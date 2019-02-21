@@ -12,9 +12,11 @@ The output of the code is 1 or more dither pattern tables that can be delivered 
 ## Dependencies
 
 * numpy
+* jupyter (for the notebooks)
 * matplotlib (for visualization of the patterns)
 * astropy
 * pySIAF (part of astroconda)
+* miricoord (David Law's MIRI coordinates package)
 
 
 ## Key to dither patterns
