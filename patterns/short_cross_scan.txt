@@ -1,0 +1,22 @@
+# Pattern name: short_cross_scan
+# Mode: slit
+# Num points: 8
+# Frame: idl
+# Repeats: c, nod1, nod2
+# CARs: CAR-018
+# CALs: CAL-036
+# Comments:
+# Created by: Sloan/Kendrew
+
+
+Pointing  x   y
+0   0.0     -0.400
+1   0.0     -0.300
+2   0.0     -0.200
+3   0.0     -0.100
+4   0.0      0.0
+5   0.0      0.100
+6   0.0      0.200
+7   0.0      0.300
+8   0.0      0.400
+

@@ -50,7 +50,7 @@ class LRSPattern(object):
 	
 	def __init__(self, t=None, file=None, mode=None, frame=None, car=None, cal=None, notes=None):
 		
-		if 
+		if (t is None) &
 		
 		self.npts = len(t)
 		self.mode = mode
