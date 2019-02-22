@@ -16,7 +16,42 @@ plt.close('all')
 
 class LRSPattern(object):
 	
-	def __init__(self, t, mode=None, frame=None, car=None, cal=None, notes=None):
+	'''
+	This code defines a class for an LRS dither pattern. It is initialised from a table of positions (this should be an astropy table), or from an ascii file that uses the standard pattern template (see LRS_pattern_template.txt). 
+	
+	Initialisation:
+	---------------
+	- file: a filename. If the file passed is not in the standard template, the initialization will fail as the metadata will likely not be found.
+	- t: an Astropy table with position index, x and y location. if the class is initialised with a table, metadat ust be provided with teh call to LRSPattern. 
+	
+	
+	Attributes:
+	-----------
+	- npts: number of pointings in the pattern (integer)
+	- mode: the LRS mode - 'slit' or 'slitless' (string)
+	- frame: the coordinate reference frame of the coordinates (string). Options:
+			* 'tel' for telescope coordinates (aka v2v3), in arcsec
+			* 'det' for detector coordinates, in pixels
+			* 'idl' for ideal coordinates, in arcsec. NOTE: slit and slitless mode have distinct ideal coordinate systems
+	- CAR: the commissioning activity request(s) this pattern is used for. this should be specified in the format 'CAR-xxx'
+	- CAL: the calibration activity request(s) this pattern is used for. this should be specified in the format 'CAL-xxx'
+	- notes: any comments in a string format. PLEASE USE to add relevant information to the pattern!
+	
+	
+	Methods:
+	--------
+	TO DO! THESE ARE IDEAS!
+	- convert coordinates: convert between frames
+	- plot: visualize the pattern
+	- regenerate: regenerate in case of new SIAF update.
+	- save: save to ascii file
+	
+	'''
+	
+	def __init__(self, t=None, file=None, mode=None, frame=None, car=None, cal=None, notes=None):
+		
+		if 
+		
 		self.npts = len(t)
 		self.mode = mode
 		self.CAR = car
