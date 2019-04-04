@@ -1,28 +1,88 @@
 import numpy as np
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
-import os
+from os import access, R_OK
 import glob
 from astropy.table import Table, Column
+import astropy.io.ascii as ascii
 import datetime
 import sys
 
 
 import pysiaf
 import miricoord
+import miricoord.miricoord.imager.mirim_tools as mt
 
 plt.close('all')
 
 
 class LRSPattern(object):
 	
-	def __init__(self, t, mode=None, frame=None, car=None, cal=None, notes=None):
-		self.npts = len(t)
-		self.mode = mode
-		self.CAR = car
-		self.CAL = cal
-		self.notes = notes
-		self.frame = frame
+	'''
+	This code defines a class for an LRS dither pattern. It is initialised from a table of positions (this should be an astropy table), or from an ascii file that uses the standard pattern template (see LRS_pattern_template.txt). 
+	
+	Initialisation:
+	---------------
+	- file: a filename. If the file passed is not in the standard template, the initialization will fail as the metadata will likely not be found.
+	- t: an Astropy table with position index, x and y location. if the class is initialised with a table, metadata must be provided with the call to LRSPattern. 
+	
+	NOTE: a input file will have priority over an input table. if both are provided, the table will be IGNORED.
+	
+	
+	Attributes:
+	-----------
+	- npts: number of pointings in the pattern (integer)
+	- mode: the LRS mode - 'slit' or 'slitless', or both. If both are written then 2 patterns will be generated. (string)
+	- frame: the coordinate reference frame of the coordinates (string). Options:
+			* 'tel' for telescope coordinates (aka v2v3), in arcsec
+			* 'det' for detector coordinates, in pixels
+			* 'idl' for ideal coordinates, in arcsec. NOTE: slit and slitless mode have distinct ideal coordinate systems
+	- car: the commissioning activity request(s) this pattern is used for. this should be specified in the format 'CAR-xxx'
+	- cal: the calibration activity request(s) this pattern is used for. this should be specified in the format 'CAL-xxx'
+	- ref: the reference point for this pattern. can be a single point or a list. choose from 'c', 'nod1', 'nod2'.
+	- notes: any comments in a string format. PLEASE USE to add relevant information to the pattern!
+	
+	
+	Methods:
+	--------
+	TO DO! THESE ARE IDEAS!
+	- convert coordinates: convert between frames
+	- plot: visualize the pattern
+	- regenerate: regenerate in case of new SIAF update.
+	- save: save to ascii file
+	
+	'''
+	
+	def __init__(self, table=None, file=None, mode=None, frame=None, car=None, cal=None, ref=None, notes=None):
+		
+		# check that either a table or a file are provided
+		assert (table is not None) or (file is not None), "You must provide either a table or a pattern file to initialize an LRSPattern instance"
+		
+		if (file is not None):
+			
+			t = ascii.read(file)
+			# t is an astropy table. the comment lines are placed in the table metadata. populate the class attributes from the metadata
+			header = ascii.read(t.meta['comments'], delimiter=':', format='no_header', names=['key', 'val'])
+			self.patt = t
+			self.mode = header['val'][header['key']=='Mode']
+			self.npts = len(t)
+			self.car = header['val'][header['key']=='CARs']
+			self.cal = header['val'][header['key']=='CALs']
+			self.notes = header['val'][header['key']=='Comments']
+			self.ref = header['val'][header['key']=='Reference']
+			self.frame = header['val'][header['key']=='Frame']
+			
+					
+				
+		else:
+			self.patt = t
+			self.npts = len(t)
+			self.mode = mode
+			self.car = car
+			self.cal = cal
+			self.notes = notes
+			self.frame = frame
+			self.reps = reps
 		
 
 
@@ -44,23 +104,46 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	
 	'''
 	
+	# checks that the parameters provided are valid
+	assert (mode in ['slit', 'slitless']), "Mode not recognised. Options are: 'slit', 'slitless'. "
+	assert (frame in ['tel', 'idl', 'det']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
+	
+	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
 	
 	# the slit corner coordinates are hard coded unfortunately (in telescope frame):
 	if (mode == 'slit'):
-			
-		coord_dict = {'ll': {'x': -411.99, 'y': -401.14},
+		# populate the dictionary with the slit corner coordinates
+		coord_dict_tel = {'ll': {'x': -411.99, 'y': -401.14},
 	    	'ul': {'x': -411.95, 'y': -400.62}, 
 	       	'ur': {'x': -416.68, 'y': -400.24},
 	       	'lr': {'x': -416.72, 'y': -400.76}}
 	
 	else:
-		
-		coord_dict = {}
+		# we don't need teh slit corner coordinates for slitless mode
+		coord_dict_tel = {}
 	
-	coord_dict.update({'c': {'x': ap.V2Ref, 'y': ap.V3Ref}})
+	coord_dict_tel.update({'c': {'x': ap.V2Ref, 'y': ap.V3Ref}})
+	
+	if (frame == 'idl'):
+		# create a copy of the telescope frame dictionary, and loop through the locations to convert the coordinates to ideal frame using the miricoord tools
+		coord_dict = coord_dict_tel.copy()
+		for loc in coord_dict_tel.keys():
+			x,y = mt.v2v3toIdeal(coord_dict_tel[loc]['x'],coord_dict_tel[loc]['y'], ap.AperName)
+			coord_dict[loc] = {'x': x, 'y': y}
+			
+	elif (frame == 'det'):
+		# create a copy of the telescope frame dictionary, and loop through the locations to convert the coordinates to detector pixels using the miricoord tools
+		#TO DO!!
+		coord_dict = coord_dict_tel.copy()
+		print("Sorry detector coordinates are not yet supported, returning v2v3 instead")
+	
+	else:
+		coord_dict = coord_dict_tel.copy()
+	
 	
 	print(coord_dict)
+	
 	
 	if plot:
 		p = plot_pattern(slit=coord_dict, patt=None)
