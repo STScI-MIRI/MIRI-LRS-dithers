@@ -111,39 +111,38 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
 	
-	# the slit corner coordinates are hard coded unfortunately (in telescope frame):
+	# the slit corner coordinates are hard coded unfortunately (in detector units):
 	if (mode == 'slit'):
-		# populate the dictionary with the slit corner coordinates
-		coord_dict_tel = {'ll': {'x': -411.99, 'y': -401.14},
-	    	'ul': {'x': -411.95, 'y': -400.62}, 
-	       	'ur': {'x': -416.68, 'y': -400.24},
-	       	'lr': {'x': -416.72, 'y': -400.76}}
-	
+		# populate the dictionary with the slit corner and centre coordinates, in PIXELS
+		coord_dict_det = {'ll': {'x': 304.77, 'y': 298.38},
+			    	'ul': {'x': 304.77, 'y': 303.03}, 
+			       	'ur': {'x': 347.49, 'y': 303.03},
+			       	'lr': {'x': 347.49, 'y': 298.38},
+					'c': {'x':326.13, 'y': 300.70}}
+		print('Coordinate dictionary in detector units: {0}'.format(coord_dict_det))
+		
 	else:
-		# we don't need teh slit corner coordinates for slitless mode
-		coord_dict_tel = {}
+		# For slitless, we start with only the centre coordinate
+		coord_dict_det = {'c': {'x': 38.5, 'y': 829.0}}
 	
-	coord_dict_tel.update({'c': {'x': ap.V2Ref, 'y': ap.V3Ref}})
+	if (frame == 'tel'):
+		coord_dict = coord_dict_det.copy()
+		for loc in coord_dict_det.keys():
+			x,y = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
+			print('{0}, {1}'.format(x, y))
+			coord_dict[loc] = {'x': x, 'y': y}
 	
-	if (frame == 'idl'):
-		# create a copy of the telescope frame dictionary, and loop through the locations to convert the coordinates to ideal frame using the miricoord tools
-		coord_dict = coord_dict_tel.copy()
-		for loc in coord_dict_tel.keys():
-			x,y = mt.v2v3toIdeal(coord_dict_tel[loc]['x'],coord_dict_tel[loc]['y'], ap.AperName)
+	elif (frame == 'idl'):
+		# to go to ideal coordinatines, we need to go to v2v3 first. so this is an additional step.
+		coord_dict = coord_dict_det.copy()
+		for loc in coord_dict_det.keys():
+			xtel,ytel = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
+			x,y = mt.v2v3toIdeal(xtel, ytel, ap.AperName)
 			coord_dict[loc] = {'x': x, 'y': y}
 			
-	elif (frame == 'det'):
-		# create a copy of the telescope frame dictionary, and loop through the locations to convert the coordinates to detector pixels using the miricoord tools
-		#TO DO!!
-		coord_dict = coord_dict_tel.copy()
-		print("Sorry detector coordinates are not yet supported, returning v2v3 instead")
 	
 	else:
-		coord_dict = coord_dict_tel.copy()
-	
-	
-	print(coord_dict)
-	
+		coord_dict = coord_dict_det.copy()
 	
 	if plot:
 		p = plot_pattern(slit=coord_dict, patt=None)
@@ -212,16 +211,15 @@ def plot_pattern(slit=None, patt=None):
 	# pull out the corner coordinates from the slit dictionary and format for plotting
 	if slit is not None:
 		print("Slit coordinates are specified. Assuming slit operation.")
-		cornersx = np.array((slit['ll']['x'], slit['ul']['x'], slit['ur']['x'], slit['lr']['x']))
-		cornersy = np.array((slit['ll']['y'], slit['ul']['y'], slit['ur']['y'], slit['lr']['y']))
+		cornersx = np.array((slit['ll']['x'][0], slit['ul']['x'][0], slit['ur']['x'][0], slit['lr']['x'][0]))
+		cornersy = np.array((slit['ll']['y'][0], slit['ul']['y'][0], slit['ur']['y'][0], slit['lr']['y'][0]))
 		corners = np.stack((cornersx, cornersy), axis=-1)
-		print(corners)
     
 		# create the matplotlib patch for plotting
 		slit_rect = Polygon(corners, closed=True, lw=2., color='g', fill=False, label='slit edge')
 		
 		ax.scatter(cornersx, cornersy, marker='+', color='g')
-		ax.scatter(slit['c']['x'], slit['c']['y'], marker='o', color='r', facecolor=None, label='slit centre')
+		ax.scatter(slit['c']['x'][0], slit['c']['y'][0], marker='o', color='r', facecolor=None, label='slit centre')
 		ax.add_patch(slit_rect)
     
 	if patt is not None:
