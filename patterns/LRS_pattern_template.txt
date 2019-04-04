@@ -1,14 +1,13 @@
 # Pattern name:
 # Mode: 
-# Num_points:
 # Frame:
-# Repeats: 
+# Reference: 
 # CARs:
 # CALs:
 # Comments:
 # Created by: 
 
 
-Number  x   y
-------  --- ---
+Pointing  x   y
+
 

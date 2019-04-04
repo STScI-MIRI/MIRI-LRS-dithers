@@ -1,10 +1,9 @@
 # Pattern name: short_cross_scan
 # Mode: slit
-# Num points: 8
 # Frame: idl
-# Repeats: c, nod1, nod2
+# Reference: c, nod1, nod2
 # CARs: CAR-018
-# CALs: CAL-036
+# CALs: 
 # Comments:
 # Created by: Sloan/Kendrew
 
