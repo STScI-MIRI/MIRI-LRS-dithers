@@ -7,6 +7,7 @@ from astropy.table import Table, Column
 import astropy.io.ascii as ascii
 import datetime
 import sys
+import pdb
 
 
 import pysiaf
@@ -35,7 +36,8 @@ class LRSPattern(object):
 	- mode: the LRS mode - 'slit' or 'slitless', or both. If both are written then 2 patterns will be generated. (string)
 	- frame: the coordinate reference frame of the coordinates (string). Options:
 			* 'tel' for telescope coordinates (aka v2v3), in arcsec
-			* 'det' for detector coordinates, in pixels
+			* 'det-abs' for *absolute* detector coordinates, in pixels
+			* 'det-rel' for *relative* detector coordinates, in pixels. to translate between relative and absolute coordinates, the code will look at the 'ref' attribute and add the required absolute coordinates.
 			* 'idl' for ideal coordinates, in arcsec. NOTE: slit and slitless mode have distinct ideal coordinate systems
 	- car: the commissioning activity request(s) this pattern is used for. this should be specified in the format 'CAR-xxx'
 	- cal: the calibration activity request(s) this pattern is used for. this should be specified in the format 'CAL-xxx'
@@ -53,7 +55,7 @@ class LRSPattern(object):
 	
 	'''
 	
-	def __init__(self, table=None, file=None, mode=None, frame=None, car=None, cal=None, ref=None, notes=None):
+	def __init__(self, table=None, file=None, mode=None, frame=None, car=None, cal=None, name=None, ref=None, notes=None):
 		
 		# check that either a table or a file are provided
 		assert (table is not None) or (file is not None), "You must provide either a table or a pattern file to initialize an LRSPattern instance"
@@ -71,6 +73,7 @@ class LRSPattern(object):
 			self.notes = header['val'][header['key']=='Comments']
 			self.ref = header['val'][header['key']=='Reference']
 			self.frame = header['val'][header['key']=='Frame']
+			self.name = file.split('.')[0]
 			
 					
 				
@@ -83,6 +86,99 @@ class LRSPattern(object):
 			self.notes = notes
 			self.frame = frame
 			self.reps = reps
+			self.name = name
+			self.ref = ref
+			
+	
+	def plot(self, out=None):
+		
+		'''
+		This function will visualize the pattern, in the coordinate system provided. If the 'ref' attribute contains more than 1 entry, then the pattern will be duplicated and translated to all locations.
+		
+		Parameters:
+		-----------
+		- out: 	if a filename is provided, the plot will be saved to this file. Default = None. (string)
+		
+		Future work:
+		------------
+		Specify the coordinate frame and perform the conversion before plotting.
+		
+		
+		'''
+		
+		# generate the key coordinates
+		coords = lrs_gencoords(mode=self.mode, frame=self.frame[:3])
+		
+		# figure out if there are multiple refrence positions
+		ref_tmp = (self.ref[0]).split(',')
+		# strip out whitespaces in case there are any:
+		refs = [r.strip() for r in ref_tmp]
+		nref = len(refs)
+		print(refs)
+		pdb.set_trace()
+		
+		
+		
+		fig, ax = plt.subplots(figsize=[12,4])
+		
+		if (self.frame == 'det-abs') or (self.frame == 'det-rel'):
+			units = 'pixels'
+		else:
+			units = 'arcsec'
+		
+		# check whether the pattern is for slit or slitless
+		if (self.mode == 'slit'):
+			coords = lrs_gencoords(mode='slit', frame=pltframe)
+			
+			# if the coordinates are in relative pixel coordinates, translate the pattern 
+			if (self.frame == 'det-rel'):
+				self.patt['x'] += coords['c']['x']
+				self.patt['y'] += coords['c']['y']
+			
+			cornersx = np.array((coords['ll']['x'], coords['ul']['x'], coords['ur']['x'], coords['lr']['x']))
+			cornersy = np.array((coords['ll']['y'], coords['ul']['y'], coords['ur']['y'], coords['lr']['y']))
+			corners = np.stack((cornersx, cornersy), axis=-1)
+			# create the matplotlib patch for plotting
+			slit_rect = Polygon(corners, closed=True, lw=2., color='g', fill=False, label='slit edge')
+			ax.scatter(cornersx, cornersy, marker='+', color='g')
+			ax.scatter(coords['c']['x'], coords['c']['y'], marker='o', color='r', label='slit centre')
+			for n in ['nod1', 'nod2']:
+				ax.scatter(coords[n]['x'], coords[n]['y'], marker='o', edgecolor='r', facecolor='white')
+			ax.add_patch(slit_rect)
+			
+		elif (self.mode == 'slitless'):
+			coords = lrs_gencoords(mode='slitless', frame=pltframe)
+			
+			# as above, if the points are given in relative pixel values, translate the pattern
+			if (self.frame == 'det-rel'):
+				self.patt['x'] += coords['c']['x']
+				self.patt['y'] += coords['c']['y']
+		
+		if (len(self.ref) == 1):
+			
+			# if there's only 1 reference point, we don't need to expand the pattern to account for different reference points
+			# if there's only 1 reference point we assume it's the centre/nominal pointing location
+			
+			#indx = np.arange(len(self.patt))
+			pts = ax.scatter(self.patt['x'], self.patt['y'], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({})'.format(self.npts))
+			cbar = fig.colorbar(pts, ax=ax)
+			cbar.set_label('pointing index')
+			ax.grid(color='k', linestyle='-', linewidth=0.5, alpha=0.5)
+			ax.set_xlabel(units)
+			ax.set_ylabel(units)
+			ax.legend(loc='upper right')
+				 
+		
+		ax.set_title(self.name)
+		
+
+		if (out is not None):
+			fig.savefig(out)
+    
+		fig.show()
+    
+		return fig
+		
 		
 
 
@@ -106,7 +202,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	
 	# checks that the parameters provided are valid
 	assert (mode in ['slit', 'slitless']), "Mode not recognised. Options are: 'slit', 'slitless'. "
-	assert (frame in ['tel', 'idl', 'det']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
+	assert (frame in ['tel', 'idl', 'det-abs', 'det-rel']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
 	
 	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
@@ -119,7 +215,10 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 			       	'ur': {'x': 347.49, 'y': 303.03},
 			       	'lr': {'x': 347.49, 'y': 298.38},
 					'c': {'x':326.13, 'y': 300.70}}
-		print('Coordinate dictionary in detector units: {0}'.format(coord_dict_det))
+		
+		# calculate and add the coordinates of the nods as well
+		coord_dict_det = generate_nods(coord_dict_det)
+		
 		
 	else:
 		# For slitless, we start with only the centre coordinate
@@ -244,3 +343,44 @@ def plot_pattern(slit=None, patt=None):
 	fig.show()
     
 	return fig
+	
+#----------------------------------------------------------------------------	
+
+def generate_nods(slit):
+	
+	'''
+	Function that takes a dictionary with slit coordinates as input and returns the locations of the nods, at 30 and 70% along the slit.
+	
+	Parameters:
+	-----------
+	- slit (dict): a dictionary with slit corner coordinates
+	
+	Output:
+	-------
+	- outslit (dict): a new dictionary; a copy of the input dictionary 'slit' with 2 additional coordinate sets appended
+	'''
+	
+	
+	outslit = slit.copy()
+	
+	# calculate the coordinates of the midpoints along the slit's edges:
+
+	midl_x = np.mean([slit['ul']['x'], slit['ll']['x']])
+	midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
+	midl = [midl_x, midl_y]
+	
+	midr_x = np.mean([slit['ur']['x'], slit['lr']['x']])
+	midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
+	midr = [midr_x, midr_y]
+
+	# now create a grid of 11 points between these points (each represents 10% along the slit) and pick the 4th and 8th in (x,y):
+	xpts = np.linspace(midl[0], midr[0], num=11)
+	ypts = np.linspace(midl[1], midr[1], num=11)
+	slit_grid = np.stack((np.array(xpts), np.array(ypts)), axis=-1)
+	
+	outslit.update({'nod1': {'x': slit_grid[3,0], 'y': slit_grid[3,1]}, 'nod2': {'x': slit_grid[7,0], 'y': slit_grid[7 ,1]}})
+	
+	print(outslit)
+	return outslit
+	
+	
