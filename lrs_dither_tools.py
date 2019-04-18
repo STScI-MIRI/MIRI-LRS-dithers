@@ -91,15 +91,10 @@ class LRSPattern(object):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1		
-				
-			print(self.patt)
 			
 				
 				
 			
-			
-					
-				
 		else:
 			self.patt = t
 			self.npts = len(t)
@@ -111,15 +106,38 @@ class LRSPattern(object):
 			self.reps = reps
 			self.name = name
 			self.ref = ref
+			
+			if (nref > 1):
+				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
+				i = 0
+				while (i < nref-1):
+					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
+					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
+					i += 1		
 	
-	
-	def expand(self):
+	def to_absolute(self):
+		
 		'''
-		This function will be called when the "ref" attribute of the pattern contains more than
+		This function will change the coordinates from relative to absolute. This is ONLY applicable for patterns defined in the 'det-rel' frame; it will take the pattern, identify the reference coordinates for the given mode, and calculate the absolute detector pixels.
+		
+		Parameters:
+		-----------
+		None
+		
+		Returns:
+		--------
+		- the input pattern with updated positions, and the reference frame set to 'det-abs' in the metadata
 		
 		
 		'''
-	
+		
+		# first check that the input pattern is defined in relative coordinates
+		assert ('rel' in self.frame[0]), "The input pattern is not in relative coordinates!"
+		
+		
+		
+		
+			
 	
 	def plot(self, out=None):
 		
