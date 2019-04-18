@@ -75,6 +75,29 @@ class LRSPattern(object):
 			self.frame = header['val'][header['key']=='Frame']
 			self.name = file.split('.')[0]
 			
+			
+			# first check if there are multiple reference positions:
+			ref_tmp = (self.ref[0]).split(',')
+			# strip out whitespaces in case there are any:
+			refs = [r.strip() for r in ref_tmp]
+			nref = len(refs)
+			
+			# if there is only 1 reference position, do nothing. if there are N>1 positions, copy the x and y columns N-1 times to make space for the extra pointings. NOTE: if there ar emultiple reference positions, the coordinate frame shouls be relative not absolute - otherwise that wouldn't make sense.
+			
+			if (nref > 1):
+				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
+				i = 0
+				while (i < nref-1):
+					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
+					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
+					i += 1		
+				
+			print(self.patt)
+			
+				
+				
+			
+			
 					
 				
 		else:
@@ -88,7 +111,15 @@ class LRSPattern(object):
 			self.reps = reps
 			self.name = name
 			self.ref = ref
-			
+	
+	
+	def expand(self):
+		'''
+		This function will be called when the "ref" attribute of the pattern contains more than
+		
+		
+		'''
+	
 	
 	def plot(self, out=None):
 		
