@@ -43,6 +43,7 @@ class LRSPattern(object):
 	- cal: the calibration activity request(s) this pattern is used for. this should be specified in the format 'CAL-xxx'
 	- ref: the reference point for this pattern. can be a single point or a list. choose from 'c', 'nod1', 'nod2'.
 	- notes: any comments in a string format. PLEASE USE to add relevant information to the pattern!
+	- nref: number of reference points
 	
 	
 	Methods:
@@ -80,14 +81,14 @@ class LRSPattern(object):
 			ref_tmp = (self.ref[0]).split(',')
 			# strip out whitespaces in case there are any:
 			refs = [r.strip() for r in ref_tmp]
-			nref = len(refs)
+			self.nref = len(refs)
 			
 			# if there is only 1 reference position, do nothing. if there are N>1 positions, copy the x and y columns N-1 times to make space for the extra pointings. NOTE: if there ar emultiple reference positions, the coordinate frame shouls be relative not absolute - otherwise that wouldn't make sense.
 			
-			if (nref > 1):
+			if (self.nref > 1):
 				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
 				i = 0
-				while (i < nref-1):
+				while (i < self.nref-1):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1		
@@ -107,10 +108,16 @@ class LRSPattern(object):
 			self.name = name
 			self.ref = ref
 			
-			if (nref > 1):
+			# first check if there are multiple reference positions:
+			ref_tmp = (self.ref[0]).split(',')
+			# strip out whitespaces in case there are any:
+			refs = [r.strip() for r in ref_tmp]
+			self.nref = len(refs)
+			
+			if (self.nref > 1):
 				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
 				i = 0
-				while (i < nref-1):
+				while (i < self.nref-1):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1		
@@ -134,7 +141,32 @@ class LRSPattern(object):
 		# first check that the input pattern is defined in relative coordinates
 		assert ('rel' in self.frame[0]), "The input pattern is not in relative coordinates!"
 		
+		print('Converting pattern to absolute coordinates.....')
+		# if the input coordinates are relative, load the coordinates so we can do the translation
+		coords = lrs_gencoords(mode=self.mode, frame=self.frame[0], verbose=False)
 		
+		# convert the reference attribute to a list
+		ref_tmp = (self.ref[0]).split(',')
+		# strip out whitespaces in case there are any:
+		refs = [r.strip() for r in ref_tmp]
+		
+		# the (number of columns - 1) needs to be == (2 * the number of entries in the reference list)
+		n_coordcols = len(self.patt.colnames) - 1
+		assert (n_coordcols == 2*self.nref), "number of columns in the pattern doesn't match the number of reference points listed"
+		
+
+		for i, r in enumerate(refs):
+			if (i==0):
+				self.patt['x'] += coords[r]['x']
+				self.patt['y'] += coords[r]['y']
+			else:
+				colx = 'x{0}'.format(i)
+				coly = 'y{0}'.format(i)
+				self.patt[colx] += coords[r]['x']
+				self.patt[coly] += coords[r]['y']
+		
+		# now update the frame attribute from relative to absolute:
+		self.frame = '{0}-abs'.format(self.frame[0][:3])
 		
 		
 			
@@ -232,7 +264,7 @@ class LRSPattern(object):
 
 
 #----------------------------------------------------------------------------	
-def lrs_gencoords(mode='slit', frame='tel', plot=False):
+def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	
 	'''
 	Function that returns a dictionary with the key coordinates for the MIRI LRS. 
@@ -240,7 +272,8 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	Parameters:
 	-----------
 	- mode: 'slit' (default) or 'slitless'. this will determine which set of coordinates is returned
-	- frame: the reference frame in which the coordinates are specified. Options: 'det' (detector [pixels]), 'idl' (Ideal [arcsec]), 'tel' (v2v3 [arcsec])
+	- frame: the reference frame in which the coordinates are specified. Options: 'det-abs' (detector [pixels], absolute), 'det-rel' (detector [pixels], relative) 'idl' (Ideal [arcsec]), 'tel' (v2v3 [arcsec])
+	- verbose: prints some output to screen (boolean, default False)
 	
 	
 	Returns:
@@ -251,7 +284,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	
 	# checks that the parameters provided are valid
 	assert (mode in ['slit', 'slitless']), "Mode not recognised. Options are: 'slit', 'slitless'. "
-	assert (frame in ['tel', 'idl', 'det-abs', 'det-rel']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
+	assert (frame in ['tel', 'idl', 'det-abs', 'det-rel']), "Coordinate frame not recognised. Options are: 'det-rel' (detector relative), 'det-abs' (detector absolute), 'idl' (ideal), 'tel' (telescope/v2v3)."
 	
 	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
@@ -266,7 +299,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 					'c': {'x':326.13, 'y': 300.70}}
 		
 		# calculate and add the coordinates of the nods as well
-		coord_dict_det = generate_nods(coord_dict_det)
+		coord_dict_det = generate_nods(coord_dict_det, verbose=verbose)
 		
 		
 	else:
@@ -277,7 +310,8 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 		coord_dict = coord_dict_det.copy()
 		for loc in coord_dict_det.keys():
 			x,y = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
-			print('{0}, {1}'.format(x, y))
+			if verbose:
+				print('{0}, {1}'.format(x, y))
 			coord_dict[loc] = {'x': x, 'y': y}
 	
 	elif (frame == 'idl'):
@@ -299,14 +333,14 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False):
 	return coord_dict
 
 #----------------------------------------------------------------------------
-def read_aperture(mode='slit'):
+def read_aperture(mode='slit', verbose=True):
 	
 	'''
 	Function that loads and returns the right SIAF aperture for LRS as specified in the 'mode' parameter: 'slit' or 'slitless'
 
 	'''
-	
-	print("Pysiaf uses PRD version {}".format(pysiaf.JWST_PRD_VERSION))
+	if verbose:
+		print("Pysiaf uses PRD version {}".format(pysiaf.JWST_PRD_VERSION))
 	
 	# check that the mode is a valid option
 	assert (mode in ['slit', 'slitless']), "Mode not supported. Please use 'slit' or 'slitless'."
@@ -395,7 +429,7 @@ def plot_pattern(slit=None, patt=None):
 	
 #----------------------------------------------------------------------------	
 
-def generate_nods(slit):
+def generate_nods(slit, verbose=False):
 	
 	'''
 	Function that takes a dictionary with slit coordinates as input and returns the locations of the nods, at 30 and 70% along the slit.
@@ -428,8 +462,8 @@ def generate_nods(slit):
 	slit_grid = np.stack((np.array(xpts), np.array(ypts)), axis=-1)
 	
 	outslit.update({'nod1': {'x': slit_grid[3,0], 'y': slit_grid[3,1]}, 'nod2': {'x': slit_grid[7,0], 'y': slit_grid[7 ,1]}})
-	
-	print(outslit)
+	if verbose:
+		print(outslit)
 	return outslit
 	
 	
