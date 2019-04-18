@@ -125,10 +125,40 @@ class LRSPattern(object):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1	
+					
+					
+		self.run_checks()
 		
 		
 	def run_checks(self):
 		
+		'''In this function we will run some sanity checks on the coordinates and reference frames provided, so that we don't waste time or create unrealistic patterns.
+		
+		Parameters:
+		-----------
+		the pattern, an LRSPattern instance
+		
+		Output:
+		-------
+		None
+		'''
+		# for frame det-abs: we can't have negative nunbers, and all numbers have to be between 1 and 1024
+		if (self.frame=='det-abs'):
+			for c in self.patt.colnames[1:]:
+				assert (np.any(self.patt[c]) < 1.), "Coordinate frame/values inconsistency: Can't have numbers below 1 in absolute coordinate frame"
+				assert (np.any(self.patt[c]) > 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+		
+		
+		# for frame 'tel', check that the coordinates are within the MIRI Imager detector
+		elif (self.frame=='tel'):
+			xcols = [xx for xx in t.patt.colnames if 'x' in xx]
+			ycols = [yy for yy in t.patt.colnames if 'y' in yy]
+			for c in self.patt[xcols]:
+				assert (np.any(self.patt[c]) >= -486.) and (np.any(self.patt[c]) <= -381.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
+			for c in self.patt[ycols]:
+				assert (np.any(self.patt[c]) >= -436.) and (np.any(self.patt[c]) <= -314.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
+			
+			
 		
 		
 		
