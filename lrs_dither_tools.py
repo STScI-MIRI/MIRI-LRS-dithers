@@ -63,6 +63,8 @@ class LRSPattern(object):
 		
 		if (file is not None):
 			
+			# if a filename is provided, the other keywords will be ignored and we'll attempt to initialise the pattern from the file
+			
 			t = ascii.read(file)
 			# t is an astropy table. the comment lines are placed in the table metadata. populate the class attributes from the metadata
 			header = ascii.read(t.meta['comments'], delimiter=':', format='no_header', names=['key', 'val'])
@@ -92,11 +94,13 @@ class LRSPattern(object):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1		
-			
 				
 				
 			
 		else:
+			
+			# if no filename is provided, initialise from the keywords
+			
 			self.patt = t
 			self.npts = len(t)
 			self.mode = mode
@@ -120,7 +124,16 @@ class LRSPattern(object):
 				while (i < self.nref-1):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
-					i += 1		
+					i += 1	
+		
+		
+	def run_checks(self):
+		
+		
+		
+		
+		
+			
 	
 	def to_absolute(self):
 		
