@@ -1,9 +1,9 @@
-# Pattern name: 1pixel_slit_scan
+# Pattern name: test_detrel
 # Mode: slit
 # Frame: det-rel
 # Reference: c
-# CARs: CAR-055
-# CALs: CAL-032
+# CARs: CAR-999
+# CALs: CAL-999
 # Comments:
 # Created by: Sloan/Kendrew
 

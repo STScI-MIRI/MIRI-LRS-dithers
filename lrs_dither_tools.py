@@ -127,7 +127,7 @@ class LRSPattern(object):
 					i += 1	
 					
 					
-		self.run_checks()
+		#self.run_checks()
 		
 		
 	def run_checks(self):
@@ -158,6 +158,15 @@ class LRSPattern(object):
 				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
 		
 		
+		elif (self.frame=='det-rel'):
+			 #with the relative detector coordinates values can be negative but they still shouldn't exceed the array size.
+			
+			for c in self.patt[xcols]:
+				assert (np.all(self.patt[c]) <= 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+			for c in self.patt[ycols]:
+				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+			#pdb.set_trace()
+
 		# for frame 'tel', check that the coordinates are within the MIRI Imager detector
 		elif (self.frame=='tel'):
 			for c in self.patt[xcols]:
