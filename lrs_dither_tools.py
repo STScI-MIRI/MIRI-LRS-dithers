@@ -125,10 +125,56 @@ class LRSPattern(object):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1	
+					
+					
+		#self.run_checks()
 		
 		
 	def run_checks(self):
 		
+		'''In this function we will run some sanity checks on the coordinates and reference frames provided, so that we don't waste time or create unrealistic patterns.
+		
+		Parameters:
+		-----------
+		the pattern, an LRSPattern instance
+		
+		Output:
+		-------
+		None
+		'''
+		
+		xcols = [xx for xx in self.patt.colnames if 'x' in xx]
+		ycols = [yy for yy in self.patt.colnames if 'y' in yy]
+		
+		if (self.frame=='det-abs'):
+			
+			for c in self.patt.colnames[1:]:
+				assert (np.all(self.patt[c]) > 0.), "Coordinate frame/values inconsistency: Coordinates must be positive in an absolute frame"
+				
+			# for x columns the values have to lie below 1032, for y columns below 1024. strictly speaking it's below 1032.5, but let's assume that if we're trying to point half a pixel from the edge, something's gone wrong.
+			for c in self.patt[xcols]:
+				assert (np.all(self.patt[c]) <= 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+			for c in self.patt[ycols]:
+				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+		
+		
+		elif (self.frame=='det-rel'):
+			 #with the relative detector coordinates values can be negative but they still shouldn't exceed the array size.
+			
+			for c in self.patt[xcols]:
+				assert (np.all(self.patt[c]) <= 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+			for c in self.patt[ycols]:
+				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
+			#pdb.set_trace()
+
+		# for frame 'tel', check that the coordinates are within the MIRI Imager detector
+		elif (self.frame=='tel'):
+			for c in self.patt[xcols]:
+				assert (np.all(self.patt[c]) >= -486.) and (np.all(self.patt[c]) <= -381.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
+			for c in self.patt[ycols]:
+				assert (np.all(self.patt[c]) >= -436.) and (np.all(self.patt[c]) <= -314.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
+			
+			
 		
 		
 		
