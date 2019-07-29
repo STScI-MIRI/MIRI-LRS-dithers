@@ -230,7 +230,6 @@ class LRSPattern(object):
 			# if the coordinates are in relative pixel coordinates, translate the pattern 
 			if (self.frame == 'det-rel'):
 				self.to_absolute()
-			
 			cornersx = np.array((coords['ll']['x'], coords['ul']['x'], coords['ur']['x'], coords['lr']['x']))
 			cornersy = np.array((coords['ll']['y'], coords['ul']['y'], coords['ur']['y'], coords['lr']['y']))
 			corners = np.stack((cornersx, cornersy), axis=-1)
