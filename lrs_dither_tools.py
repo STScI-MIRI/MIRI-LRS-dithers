@@ -25,7 +25,7 @@ class LRSPattern(object):
 	Initialisation:
 	---------------
 	- file: a filename. If the file passed is not in the standard template, the initialization will fail as the metadata will likely not be found.
-	- t: an Astropy table with position index, x and y location. if the class is initialised with a table, metadata must be provided with the call to LRSPattern. 
+	- pattern: an Astropy table with position index, x and y location. if the class is initialised with a table, metadata must be provided with the call to LRSPattern. 
 	
 	NOTE: a input file will have priority over an input table. if both are provided, the table will be IGNORED.
 	
@@ -56,10 +56,10 @@ class LRSPattern(object):
 	
 	'''
 	
-	def __init__(self, table=None, file=None, mode=None, frame=None, car=None, cal=None, name=None, ref=None, notes=None):
+	def __init__(self, pattern=None, file=None, mode=None, frame=None, car=None, cal=None, name=None, ref=None, notes=None):
 		
 		# check that either a table or a file are provided
-		assert (table is not None) or (file is not None), "You must provide either a table or a pattern file to initialize an LRSPattern instance"
+		assert (pattern is not None) or (file is not None), "You must provide either a table or a pattern file to initialize an LRSPattern instance"
 		
 		if (file is not None):
 			
@@ -101,8 +101,8 @@ class LRSPattern(object):
 			
 			# if no filename is provided, initialise from the keywords
 			
-			self.patt = t
-			self.npts = len(t)
+			self.patt = pattern
+			self.npts = len(pattern)
 			self.mode = mode
 			self.car = car
 			self.cal = cal
@@ -247,7 +247,7 @@ class LRSPattern(object):
 		'''
 		
 		# generate the key coordinates
-		coords = lrs_gencoords(mode=self.mode, frame=self.frame[:3])
+		coords = lrs_gencoords(mode=self.mode, frame=self.frame[0][:3])
 		
 		# figure out if there are multiple refrence positions
 		ref_tmp = (self.ref[0]).split(',')
@@ -255,7 +255,7 @@ class LRSPattern(object):
 		refs = [r.strip() for r in ref_tmp]
 		nref = len(refs)
 		print(refs)
-		pdb.set_trace()
+		#pdb.set_trace()
 		
 		
 		
@@ -343,7 +343,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	
 	# checks that the parameters provided are valid
 	assert (mode in ['slit', 'slitless']), "Mode not recognised. Options are: 'slit', 'slitless'. "
-	assert (frame in ['tel', 'idl', 'det-abs', 'det-rel']), "Coordinate frame not recognised. Options are: 'det-rel' (detector relative), 'det-abs' (detector absolute), 'idl' (ideal), 'tel' (telescope/v2v3)."
+	assert (frame in ['tel', 'idl', 'det']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
 	
 	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
