@@ -11,6 +11,7 @@ import pdb
 
 
 import pysiaf
+from lrs_dither_tools import lrs_gencoords
 import miricoord
 import miricoord.miricoord.imager.mirim_tools as mt
 
@@ -178,7 +179,7 @@ class LRSPattern(object):
 				self.patt[coly] += coords[r]['y']
 		
 		# now update the frame attribute from relative to absolute:
-		self.frame = '{0}-abs'.format(self.frame[0][:3])
+		self.frame = ['{0}-abs'.format(self.frame[0][:3])]
 			
 		return
 		
@@ -200,7 +201,7 @@ class LRSPattern(object):
 		'''
 		
 		# generate the key coordinates
-		coords = lrs_gencoords(mode=self.mode, frame=self.frame[0][:3])
+		#coords = lrs_gencoords(mode=self.mode, frame=self.frame[0][:3])
 		
 		# figure out if there are multiple refrence positions
 		ref_tmp = (self.ref[0]).split(',')
@@ -227,6 +228,7 @@ class LRSPattern(object):
 			
 			# if the coordinates are in relative pixel coordinates, translate the pattern 
 			if (self.frame[0] == 'det-rel'):
+				print('NOTE: converting the pattern to absolute detector coordinates')
 				self.to_absolute()
 			cornersx = np.array((coords['ll']['x'], coords['ul']['x'], coords['ur']['x'], coords['lr']['x']))
 			cornersy = np.array((coords['ll']['y'], coords['ul']['y'], coords['ur']['y'], coords['lr']['y']))
