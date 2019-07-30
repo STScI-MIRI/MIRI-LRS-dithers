@@ -182,8 +182,6 @@ class LRSPattern(object):
 			
 		return
 		
-		
-#===============================================================================================					
 	
 	def plot(self, out=None):
 		
@@ -216,19 +214,19 @@ class LRSPattern(object):
 		
 		fig, ax = plt.subplots(figsize=[12,4])
 		
-		if (self.frame == 'det-abs') or (self.frame == 'det-rel'):
+		if (self.frame[0] == 'det-abs') or (self.frame[0] == 'det-rel'):
 			units = 'pixels'
 			pltframe = 'det'
 		else:
 			units = 'arcsec'
-			pltframe = self.frame
+			pltframe = self.frame[0]
 		
 		# check whether the pattern is for slit or slitless
 		if (self.mode == 'slit'):
 			coords = lrs_gencoords(mode='slit', frame=pltframe)
 			
 			# if the coordinates are in relative pixel coordinates, translate the pattern 
-			if (self.frame == 'det-rel'):
+			if (self.frame[0] == 'det-rel'):
 				self.to_absolute()
 			cornersx = np.array((coords['ll']['x'], coords['ul']['x'], coords['ur']['x'], coords['lr']['x']))
 			cornersy = np.array((coords['ll']['y'], coords['ul']['y'], coords['ur']['y'], coords['lr']['y']))
@@ -248,13 +246,30 @@ class LRSPattern(object):
 			if (self.frame == 'det-rel'):
 				self.to_absolute()
 		
-		if (len(self.ref) == 1):
+		if (nref == 1):
 			
 			# if there's only 1 reference point, we don't need to expand the pattern to account for different reference points
 			# if there's only 1 reference point we assume it's the centre/nominal pointing location
 			
 			#indx = np.arange(len(self.patt))
 			pts = ax.scatter(self.patt['x'], self.patt['y'], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({})'.format(self.npts))
+			cbar = fig.colorbar(pts, ax=ax)
+			cbar.set_label('pointing index')
+			ax.grid(color='k', linestyle='-', linewidth=0.5, alpha=0.5)
+			ax.set_xlabel(units)
+			ax.set_ylabel(units)
+			ax.legend(loc='upper right')
+		
+		else:
+			# if there are multiple reference points, need to plot from multiple sets of columns
+			for i, r in enumerate(refs):
+				if (i==0):
+					pts = ax.scatter(self.patt['x'], self.patt['y'], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({0}, {1})'.format(self.npts, r))
+				else:
+					colx = 'x{0}'.format(i)
+					coly = 'y{0}'.format(i)
+					pts = ax.scatter(self.patt[colx], self.patt[coly], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({0}, {1})'.format(self.npts, r))
+					
 			cbar = fig.colorbar(pts, ax=ax)
 			cbar.set_label('pointing index')
 			ax.grid(color='k', linestyle='-', linewidth=0.5, alpha=0.5)
