@@ -289,6 +289,26 @@ class LRSPattern(object):
 		fig.show()
     
 		return fig
+	
+	def to_coordinates(frame=None):
+		
+		'''
+		This function will convert the pattern coordinates to a new frame, specified in the frame keyword.
+		
+		Parameters:
+		-----------
+		- frame:	the output coordinate frame. can be 'tel', 'idl', or 'det'. the frame 'det' will be interpreted as 'det-abs'
+		
+		Output:
+		--------
+		- the LRS pattern, with pointings and frame attribute updated
+		
+		
+		'''
+		
+		
+		
+	
 		
 		
 	def run_checks(self):
