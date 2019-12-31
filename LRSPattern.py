@@ -290,7 +290,7 @@ class LRSPattern(object):
     
 		return fig
 	
-	def to_coordinates(frame=None):
+	def to_coordinates(self, new_frame=None):
 		
 		'''
 		This function will convert the pattern coordinates to a new frame, specified in the frame keyword.
@@ -306,9 +306,128 @@ class LRSPattern(object):
 		
 		'''
 		
+		assert (new_frame != self.frame), "Output frame is the same as the current frame!"
+		assert (new_frame in ['det', 'tel', 'idl']), "Frame not recognised. Please specify 'det', 'tel' or 'idl'"
 		
 		
-	
+		colpt = self.patt['Pointing'].copy()
+		ncols = len(self.patt.colnames)
+		
+		if (new_frame == 'tel'):
+			print('Converting coordinates to Telescope (v2v3) frame')
+			
+			pdb.set_trace()
+			if ('det' in self.frame[0]):
+				
+				if (self.nref == 1):
+					
+					new_patt = mt.xytov2v3(self.patt['x'], self.patt['y'], 'F770W')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+					
+					pass
+			
+			elif ('idl' in self.frame[0]):
+				
+				if (self.nref == 1):
+					
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else: 
+					
+					pass 
+					
+			else:
+				
+				pass
+					
+					
+		elif (new_frame == 'idl'):
+			print('Converting coordinates to Ideal frame')
+			
+			if ('det' in self.frame[0]):
+				
+				if (self.nref == 1):
+					
+					new_patt = mt.xytov2v3(self.patt['x'], self.patt['y'], 'F770W')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+					
+					pass
+			
+			elif ('tel' in self.frame[0]):
+				
+				if (self.nref == 1):
+					
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.v2v3toIdeal(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.v2v3toIdeal(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM') 
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+										
+					pass
+			
+			
+		
+		elif (new_frame == 'det'):
+			print('Converting coordinates to Detector frame')
+			
+				if ('tel' in self.frame[0]):
+					
+					if (self.nref == 1):
+						
+						new_patt = mt.v2v3toxy(self.patt['x'], self.patt['y'], 'F770W')
+						colx = Column(new_patt[0], name=self.patt.colnames[1])
+						coly = Column(new_patt[1], name=self.patt.colnames[2])
+						new_patt_table = Table([colpt, colx, coly])
+					
+						# update the Pattern attributes:
+						self.patt = new_patt_table
+						self.frame = new_frame
+
+					else:
+						
+						pass
+
+				elif ('idl' in self.frame[0]):
+					
+					print('Cannot currently convert from Ideal to xy')
+					
+					pass
+					
+					
+		return
 		
 		
 	def run_checks(self):
