@@ -76,7 +76,7 @@ class LRSPattern(object):
 			self.cal = header['val'][header['key']=='CALs']
 			self.notes = header['val'][header['key']=='Comments']
 			self.ref = header['val'][header['key']=='Reference']
-			self.frame = header['val'][header['key']=='Frame']
+			self.frame = header['val'][header['key']=='Frame'][0]
 			self.name = file.split('.')[0]
 			
 			
@@ -120,7 +120,7 @@ class LRSPattern(object):
 			self.nref = len(refs)
 			
 			if (self.nref > 1):
-				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
+				assert ('rel' in self.frame), "Cannot have multiple references for the pattern with an absolute coordinate frame"
 				i = 0
 				while (i < self.nref-1):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
@@ -152,11 +152,11 @@ class LRSPattern(object):
 		'''
 		
 		# first check that the input pattern is defined in relative coordinates
-		assert ('rel' in self.frame[0]), "The input pattern is not in relative coordinates!"
+		assert ('rel' in self.frame), "The input pattern is not in relative coordinates!"
 		
 		print('Converting pattern to absolute coordinates.....')
 		# if the input coordinates are relative, load the coordinates so we can do the translation
-		coords = lrs_gencoords(mode=self.mode, frame=self.frame[0][:3], verbose=False)
+		coords = lrs_gencoords(mode=self.mode, frame=self.frame[:3], verbose=False)
 		
 		# convert the reference attribute to a list
 		ref_tmp = (self.ref[0]).split(',')
@@ -179,7 +179,7 @@ class LRSPattern(object):
 				self.patt[coly] += coords[r]['y']
 		
 		# now update the frame attribute from relative to absolute:
-		self.frame = ['{0}-abs'.format(self.frame[0][:3])]
+		self.frame = ['{0}-abs'.format(self.frame[:3])]
 			
 		return
 		
@@ -201,33 +201,36 @@ class LRSPattern(object):
 		'''
 		
 		# generate the key coordinates
-		#coords = lrs_gencoords(mode=self.mode, frame=self.frame[0][:3])
+		#coords = lrs_gencoords(mode=self.mode, frame=self.frame[:3])
 		
 		# figure out if there are multiple refrence positions
 		ref_tmp = (self.ref[0]).split(',')
 		# strip out whitespaces in case there are any:
 		refs = [r.strip() for r in ref_tmp]
 		nref = len(refs)
-		print(refs)
 		#pdb.set_trace()
 		
 		
 		
 		fig, ax = plt.subplots(figsize=[12,4])
 		
-		if (self.frame[0] == 'det-abs') or (self.frame[0] == 'det-rel'):
+		if (self.frame == 'det-abs') or (self.frame == 'det-rel'):
 			units = 'pixels'
 			pltframe = 'det'
 		else:
 			units = 'arcsec'
-			pltframe = self.frame[0]
+			pltframe = self.frame
+		
+		#print(pltframe)
+		#pdb.set_trace()
 		
 		# check whether the pattern is for slit or slitless
 		if (self.mode == 'slit'):
 			coords = lrs_gencoords(mode='slit', frame=pltframe)
+			print(coords)
 			
 			# if the coordinates are in relative pixel coordinates, translate the pattern 
-			if (self.frame[0] == 'det-rel'):
+			if (self.frame == 'det-rel'):
 				print('NOTE: converting the pattern to absolute detector coordinates')
 				self.to_absolute()
 			cornersx = np.array((coords['ll']['x'], coords['ul']['x'], coords['ur']['x'], coords['lr']['x']))
@@ -290,7 +293,7 @@ class LRSPattern(object):
     
 		return fig
 	
-	def to_coordinates(frame=None):
+	def to_coordinates(self, new_frame=None):
 		
 		'''
 		This function will convert the pattern coordinates to a new frame, specified in the frame keyword.
@@ -306,9 +309,134 @@ class LRSPattern(object):
 		
 		'''
 		
+		assert (new_frame != self.frame), "Output frame is the same as the current frame!"
+		assert (new_frame in ['det', 'tel', 'idl']), "Frame not recognised. Please specify 'det', 'tel' or 'idl'"
 		
 		
-	
+		colpt = self.patt['Pointing'].copy()
+		ncols = len(self.patt.colnames)
+		
+		if (new_frame == 'tel'):
+			print('Converting coordinates to Telescope (v2v3) frame')
+			
+			# NOTE: convert the detector coordinates to ZERO-INDEXED coordinates before conversion. 
+			#pdb.set_trace()
+			if ('det' in self.frame):
+				
+				if (self.nref == 1):
+					
+					new_patt = mt.xytov2v3(self.patt['x']-1., self.patt['y']-1., 'F770W')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+					
+					pass
+			
+			elif ('idl' in self.frame):
+				
+				if (self.nref == 1):
+					
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else: 
+					
+					pass 
+					
+			else:
+				
+				pass
+					
+					
+		elif (new_frame == 'idl'):
+			print('Converting coordinates to Ideal frame')
+			
+			if ('det' in self.frame):
+				
+				if (self.nref == 1):
+					
+					tel_patt = mt.xytov2v3(self.patt['x']-1., self.patt['y']-1., 'F770W')
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLITLESSPRISM')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+					
+					pass
+			
+			elif ('tel' in self.frame):
+				
+				if (self.nref == 1):
+					
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.v2v3toIdeal(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.v2v3toIdeal(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM') 
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+				
+				else:
+										
+					pass
+			
+			
+		
+		elif (new_frame == 'det'):
+			print('Converting coordinates to Detector frame')
+			# NOTE the tel -> detector conversion returns ZERO-INDEXED coordinates, so need to add 1 to put into SIAF frame
+				
+			if ('tel' in self.frame):
+					
+				if (self.nref == 1):
+						
+					new_patt = mt.v2v3toxy(self.patt['x'], self.patt['y'], 'F770W')
+					colx = Column(new_patt[0]+1., name=self.patt.colnames[1])
+					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+				
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
+
+				else:
+					
+					pass
+
+			elif ('idl' in self.frame):
+					
+				print('Cannot currently convert from Ideal to xy')
+					
+				pass
+					
+					
+		return
 		
 		
 	def run_checks(self):

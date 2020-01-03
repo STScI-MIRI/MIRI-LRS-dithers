@@ -63,7 +63,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 			x,y = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
 			if verbose:
 				print('{0}, {1}'.format(x, y))
-			coord_dict[loc] = {'x': x, 'y': y}
+			coord_dict[loc] = {'x': x[0], 'y': y[0]}
 	
 	elif (frame == 'idl'):
 		# to go to ideal coordinatines, we need to go to v2v3 first. so this is an additional step.
@@ -71,7 +71,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 		for loc in coord_dict_det.keys():
 			xtel,ytel = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
 			x,y = mt.v2v3toIdeal(xtel, ytel, ap.AperName)
-			coord_dict[loc] = {'x': x, 'y': y}
+			coord_dict[loc] = {'x': x[0], 'y': y[0]}
 			
 	
 	else:
