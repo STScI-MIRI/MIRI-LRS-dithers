@@ -221,8 +221,8 @@ class LRSPattern(object):
 			units = 'arcsec'
 			pltframe = self.frame
 		
-		print(pltframe)
-		pdb.set_trace()
+		#print(pltframe)
+		#pdb.set_trace()
 		
 		# check whether the pattern is for slit or slitless
 		if (self.mode == 'slit'):
@@ -319,12 +319,13 @@ class LRSPattern(object):
 		if (new_frame == 'tel'):
 			print('Converting coordinates to Telescope (v2v3) frame')
 			
+			# NOTE: convert the detector coordinates to ZERO-INDEXED coordinates before conversion. 
 			#pdb.set_trace()
 			if ('det' in self.frame):
 				
 				if (self.nref == 1):
 					
-					new_patt = mt.xytov2v3(self.patt['x'], self.patt['y'], 'F770W')
+					new_patt = mt.xytov2v3(self.patt['x']-1., self.patt['y']-1., 'F770W')
 					colx = Column(new_patt[0], name=self.patt.colnames[1])
 					coly = Column(new_patt[1], name=self.patt.colnames[2])
 					new_patt_table = Table([colpt, colx, coly])
@@ -369,7 +370,11 @@ class LRSPattern(object):
 				
 				if (self.nref == 1):
 					
-					new_patt = mt.xytov2v3(self.patt['x'], self.patt['y'], 'F770W')
+					tel_patt = mt.xytov2v3(self.patt['x']-1., self.patt['y']-1., 'F770W')
+					if (self.mode[0] == 'slit'):
+						new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLITLESSPRISM')
 					colx = Column(new_patt[0], name=self.patt.colnames[1])
 					coly = Column(new_patt[1], name=self.patt.colnames[2])
 					new_patt_table = Table([colpt, colx, coly])
@@ -405,14 +410,15 @@ class LRSPattern(object):
 		
 		elif (new_frame == 'det'):
 			print('Converting coordinates to Detector frame')
+			# NOTE the tel -> detector conversion returns ZERO-INDEXED coordinates, so need to add 1 to put into SIAF frame
 				
 			if ('tel' in self.frame):
 					
 				if (self.nref == 1):
 						
 					new_patt = mt.v2v3toxy(self.patt['x'], self.patt['y'], 'F770W')
-					colx = Column(new_patt[0], name=self.patt.colnames[1])
-					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					colx = Column(new_patt[0]+1., name=self.patt.colnames[1])
+					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
 					new_patt_table = Table([colpt, colx, coly])
 				
 					# update the Pattern attributes:
