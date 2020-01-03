@@ -76,7 +76,7 @@ class LRSPattern(object):
 			self.cal = header['val'][header['key']=='CALs']
 			self.notes = header['val'][header['key']=='Comments']
 			self.ref = header['val'][header['key']=='Reference']
-			self.frame = header['val'][header['key']=='Frame']
+			self.frame = header['val'][header['key']=='Frame'][0]
 			self.name = file.split('.')[0]
 			
 			
@@ -316,7 +316,7 @@ class LRSPattern(object):
 		if (new_frame == 'tel'):
 			print('Converting coordinates to Telescope (v2v3) frame')
 			
-			pdb.set_trace()
+			#pdb.set_trace()
 			if ('det' in self.frame[0]):
 				
 				if (self.nref == 1):
@@ -402,29 +402,29 @@ class LRSPattern(object):
 		
 		elif (new_frame == 'det'):
 			print('Converting coordinates to Detector frame')
-			
-				if ('tel' in self.frame[0]):
+				
+			if ('tel' in self.frame[0]):
 					
-					if (self.nref == 1):
+				if (self.nref == 1):
 						
-						new_patt = mt.v2v3toxy(self.patt['x'], self.patt['y'], 'F770W')
-						colx = Column(new_patt[0], name=self.patt.colnames[1])
-						coly = Column(new_patt[1], name=self.patt.colnames[2])
-						new_patt_table = Table([colpt, colx, coly])
-					
-						# update the Pattern attributes:
-						self.patt = new_patt_table
-						self.frame = new_frame
+					new_patt = mt.v2v3toxy(self.patt['x'], self.patt['y'], 'F770W')
+					colx = Column(new_patt[0], name=self.patt.colnames[1])
+					coly = Column(new_patt[1], name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+				
+					# update the Pattern attributes:
+					self.patt = new_patt_table
+					self.frame = new_frame
 
-					else:
-						
-						pass
-
-				elif ('idl' in self.frame[0]):
-					
-					print('Cannot currently convert from Ideal to xy')
+				else:
 					
 					pass
+
+			elif ('idl' in self.frame[0]):
+					
+				print('Cannot currently convert from Ideal to xy')
+					
+				pass
 					
 					
 		return
