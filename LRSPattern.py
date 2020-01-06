@@ -3,7 +3,7 @@ from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
 from os import access, R_OK
 import glob
-from astropy.table import Table, Column
+from astropy.table import Table, Column, vstack
 import astropy.io.ascii as ascii
 import datetime
 import sys
@@ -89,12 +89,23 @@ class LRSPattern(object):
 			# if there is only 1 reference position, do nothing. if there are N>1 positions, copy the x and y columns N-1 times to make space for the extra pointings. NOTE: if there ar emultiple reference positions, the coordinate frame shouls be relative not absolute - otherwise that wouldn't make sense.
 			
 			if (self.nref > 1):
-				assert ('rel' in self.frame[0]), "Cannot have multiple references for the pattern with an absolute coordinate frame"
-				i = 0
-				while (i < self.nref-1):
+				assert ('rel' in self.frame), "Cannot have multiple references for the pattern with an absolute coordinate frame"
+				i = 1
+				while (i <= self.nref-1):
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
 					i += 1		
+					
+					# for each additional reference point, create a copy of the table that we will then stack with the original vertically (vstack)
+					#new_patt = self.patt[:self.npts].copy()
+					#new_patt['Pointing'] += self.patt['Pointing'][:self.npts]
+					#self.patt = vstack([self.patt, new_patt])
+					#i += 1
+				#self.patt['Pointing'] = np.arange(1, len(self.patt)+1)
+					
+					#self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
+					#self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
+					#i += 1		
 				
 				
 			
@@ -121,11 +132,15 @@ class LRSPattern(object):
 			
 			if (self.nref > 1):
 				assert ('rel' in self.frame), "Cannot have multiple references for the pattern with an absolute coordinate frame"
-				i = 0
-				while (i < self.nref-1):
+				i = 1
+				while (i <= self.nref-1):
+					#new_patt = self.patt[:self.npts].copy()
+					#new_patt['Pointing'] += self.patt['Pointing'][:self.npts]
 					self.patt.add_column(t['x'].copy(), name='x{0}'.format(i+1))
 					self.patt.add_column(t['y'].copy(), name='y{0}'.format(i+1))	
+					#self.patt = vstack([self.patt, new_patt])
 					i += 1	
+				#self.patt['Pointing'] = np.arange(1, len(self.patt)+1)
 					
 					
 		#self.run_checks()
@@ -173,8 +188,8 @@ class LRSPattern(object):
 				self.patt['x'] += coords[r]['x']
 				self.patt['y'] += coords[r]['y']
 			else:
-				colx = 'x{0}'.format(i)
-				coly = 'y{0}'.format(i)
+				colx = 'x{0}'.format(i+1)
+				coly = 'y{0}'.format(i+1)
 				self.patt[colx] += coords[r]['x']
 				self.patt[coly] += coords[r]['y']
 		
@@ -271,8 +286,8 @@ class LRSPattern(object):
 				if (i==0):
 					pts = ax.scatter(self.patt['x'], self.patt['y'], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({0}, {1})'.format(self.npts, r))
 				else:
-					colx = 'x{0}'.format(i)
-					coly = 'y{0}'.format(i)
+					colx = 'x{0}'.format(i+1)
+					coly = 'y{0}'.format(i+1)
 					pts = ax.scatter(self.patt[colx], self.patt[coly], marker='x', c=self.patt['Pointing'], cmap='plasma', label='pointings ({0}, {1})'.format(self.npts, r))
 					
 			cbar = fig.colorbar(pts, ax=ax)

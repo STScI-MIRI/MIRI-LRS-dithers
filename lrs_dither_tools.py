@@ -34,6 +34,8 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	'''
 	
 	# checks that the parameters provided are valid
+	print(frame)
+	pdb.set_trace()
 	assert (mode in ['slit', 'slitless']), "Mode not recognised. Options are: 'slit', 'slitless'. "
 	assert (frame in ['tel', 'idl', 'det']), "Coordinate frame not recognised. Options are: 'det' (detector), 'idl' (ideal), 'tel' (telescope/v2v3)."
 	
