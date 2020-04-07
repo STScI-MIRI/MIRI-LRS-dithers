@@ -1,7 +1,7 @@
 # Pattern name: short_cross_scan
 # Mode: slit
 # Frame: idl
-# Reference: c, nod1, nod2
+# Reference: c
 # CARs: CAR-018
 # CALs: 
 # Comments:

@@ -194,7 +194,7 @@ class LRSPattern(object):
 				self.patt[coly] += coords[r]['y']
 		
 		# now update the frame attribute from relative to absolute:
-		self.frame = ['{0}-abs'.format(self.frame[:3])]
+		self.frame = '{0}-abs'.format(self.frame[:3])
 			
 		return
 		
@@ -338,6 +338,9 @@ class LRSPattern(object):
 			#pdb.set_trace()
 			if ('det' in self.frame):
 				
+				if ('rel' in self.frame):
+					self.to_absolute()
+				
 				if (self.nref == 1):
 					
 					new_patt = mt.xytov2v3(self.patt['x']-1., self.patt['y']-1., 'F770W')
@@ -382,6 +385,9 @@ class LRSPattern(object):
 			print('Converting coordinates to Ideal frame')
 			
 			if ('det' in self.frame):
+				
+				if ('rel' in self.frame):
+					self.to_absolute()
 				
 				if (self.nref == 1):
 					
