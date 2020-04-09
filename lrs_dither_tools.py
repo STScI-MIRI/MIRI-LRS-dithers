@@ -12,7 +12,7 @@ import pdb
 
 import pysiaf
 import miricoord
-import miricoord.miricoord.imager.mirim_tools as mt
+import miricoord.imager.mirim_tools as mt
 
 
 def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
@@ -218,5 +218,64 @@ def generate_nods(slit, verbose=False):
 	if verbose:
 		print(outslit)
 	return outslit
+
+#----------------------------------------------------------------------------	
+def generate_dither_file(mode=None, format=None, outfile=None, verbose=False):
+    
+    '''
+    Function that will write out dither pattern files for selected purposes. Supported are: APT, MIRISim. 
+
+    
+    Parameters:
+    -----------
+    - mode:     'slit' or 'slitless'
+    - format:   the tool the file will be read by. this will determine the output reference frame.
+    - verbose:  Boolean, for extra output. default='False'
+    - outfile:  output filename
+    
+    Output:
+    -------
+    outfile:    output filename. if no name is provided, a filename will be created from the mode, format and creation date.
+    
+    
+    '''
+
+    # take the mode, and read in all patterns in that pattern directory
+    
+    # for APT, convert all to Ideal coordinates. for MIRISim, absolute detector coordinates.
+    
+    # remember to split hem out if there are multiple reference locations
+    
+    # create a big file and print all patterns to file
+    
+    return outfile
+
+#----------------------------------------------------------------------------	
+def write_pattern(patt=None, mode=None, frame=None, outfile=None):
+    '''
+    Function that will write out a single dither pattern to file, in any supported coordinate frame. 
+
+    
+    Parameters:
+    -----------
+    - patt:     pattern name. this must be the same as the filename
+    - mode:     'slit' or 'slitless'
+    - format:   the tool the file will be read by. this will determine the output reference frame.
+    - outfile:  output filename
+    
+    Output:
+    -------
+    outfile:    output filename. if no name is provided, a filename will be created from the mode, format and creation date.
+    
+    
+    '''
+    
+    # find the file in the appropriate subdirectory
+    
+    # initialise as a pattern
+    
+    # convert to requested coordinate frame if needed
+    
+    # write to ascii file
 	
 	
