@@ -251,31 +251,3 @@ def generate_dither_file(mode=None, format=None, outfile=None, verbose=False):
     return outfile
 
 #----------------------------------------------------------------------------	
-def write_pattern(patt=None, mode=None, frame=None, outfile=None):
-    '''
-    Function that will write out a single dither pattern to file, in any supported coordinate frame. 
-
-    
-    Parameters:
-    -----------
-    - patt:     pattern name. this must be the same as the filename
-    - mode:     'slit' or 'slitless'
-    - format:   the tool the file will be read by. this will determine the output reference frame.
-    - outfile:  output filename
-    
-    Output:
-    -------
-    outfile:    output filename. if no name is provided, a filename will be created from the mode, format and creation date.
-    
-    
-    '''
-    
-    # find the file in the appropriate subdirectory
-    
-    # initialise as a pattern
-    
-    # convert to requested coordinate frame if needed
-    
-    # write to ascii file
-	
-	

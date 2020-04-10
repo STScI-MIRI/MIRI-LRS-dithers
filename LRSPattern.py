@@ -13,7 +13,7 @@ import pdb
 import pysiaf
 from lrs_dither_tools import lrs_gencoords
 import miricoord
-import miricoord.miricoord.imager.mirim_tools as mt
+import miricoord.imager.mirim_tools as mt
 
 plt.close('all')
 
@@ -77,7 +77,10 @@ class LRSPattern(object):
 			self.notes = header['val'][header['key']=='Comments']
 			self.ref = header['val'][header['key']=='Reference']
 			self.frame = header['val'][header['key']=='Frame'][0]
-			self.name = file.split('.')[0]
+			if ('/' in file):
+				self.name = (file.split('/')[1]).split('.')[0]
+			else:
+				self.name = file.split('.')[0]
 			
 			
 			# first check if there are multiple reference positions:
@@ -507,6 +510,63 @@ class LRSPattern(object):
 			
 		return
 
-
-
 #----------------------------------------------------------------------------	
+
+	def write(self, frame=None, outfile=None):
+		
+		'''
+		Function that will write out a single dither pattern to file, in any supported coordinate frame. 
+		
+		Parameters:
+		-----------
+		- frame:	the output reference frame (supported: 'det-abs', 'idl', 'tel')
+		- outfile:	output filename (optional)
+		
+		Output:
+		-------
+		outfile:	output filename. if no name is provided, a filename will be created from the mode, format and creation date.
+
+
+
+		'''
+		
+		today = datetime.date.today().isoformat()
+		
+		# create an iterable list for the reference positions. works fine for a single reference location as well:
+		refs_tmp = (self.ref[0]).split(',')
+		# this will just remove any whitespace from the reference locations:
+		refs = [r.strip() for r in refs_tmp]
+		
+		# define a filename either based on the outfile parameter or based on the pattern name, today's date, frame and reference location. i.e. if there's > 1 ref, multiple files will be created
+		if outfile:
+			out = ['output-patterns/{0}_{1}.txt'.format(outfile, rr) for rr in refs]
+
+		else: 
+			out = ['output-patterns/{0}_{1}_{2}_{3}.txt'.format(self.name, rr, frame, today) for rr in refs]
+			
+		
+		# convert to the right coordinate frame if needed:
+		if (self.frame != frame):
+			self.to_coordinates(new_frame=frame)
+		
+		# if there's only one reference position, take the pattern, convert coordinates and write out to file:
+		if (len(refs) == 1):
+			self.patt.write(out[0], format='ascii.no_header')
+		
+		
+		# if there's multiple reference positions, we have multiple output files. first let's check that the number of refrence points corresponds to the number of output file, and that the number of ref points matches the number of columns in the pattern
+		else:
+			assert len(refs) == len(out), "Number of reference points doesn't match output files"
+			assert len(refs) == (len(self.patt.columns)-1)/2, "Number of reference points doesn't match pattern shape"
+			
+			# if checks are okay, loop through output files and write out the appropriate columns from the pattern
+			
+			for i, oo in enumerate(out):
+				# create a new output table based on the pattern. we always wabt column[0] (Pointing number), and then 2 columns for x and y
+				ref_patt = Table([self.patt.columns[0], self.patt.columns[(i*2)+1], self.patt.columns[(i*2)+2]], names=['Pointing', 'X', 'Y'], dtype=['i4', 'f8', 'f8'])
+				ref_patt.write(oo, format='ascii.no_header')
+				
+			
+		
+		return
+		
