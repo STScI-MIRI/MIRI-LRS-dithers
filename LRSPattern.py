@@ -435,8 +435,15 @@ class LRSPattern(object):
 		elif (new_frame == 'det'):
 			print('Converting coordinates to Detector frame')
 			# NOTE the tel -> detector conversion returns ZERO-INDEXED coordinates, so need to add 1 to put into SIAF frame
+			
+			if ('rel' in self.frame):
+				self.to_absolute()
+			
+			elif ('abs' in self.frame):
+				#DO NOTHING
+				pass
 				
-			if ('tel' in self.frame):
+			elif ('tel' in self.frame):
 					
 				if (self.nref == 1):
 						
@@ -548,10 +555,16 @@ class LRSPattern(object):
 		# convert to the right coordinate frame if needed:
 		if (self.frame != frame):
 			self.to_coordinates(new_frame=frame)
+			
+			
+			
 		
 		# if there's only one reference position, take the pattern, convert coordinates and write out to file:
 		if (len(refs) == 1):
-			self.patt.write(out[0], format='ascii.no_header')
+			new_patt = Table([self.patt.columns[0], self.patt.columns[1], self.patt.columns[2]], names=['Pointing', 'X', 'Y'], dtype=['i4', 'f8', 'f8'])
+			ascii.write(new_patt, output=out[0], format='basic', delimiter='\t', formats={'X': '%.3f', 'Y': '%.3f'}, overwrite=True)
+			
+			#new_patt.write(out[0], format='ascii.no_header', formats={'X': '%:.3f', 'Y': '%:.3f'})
 		
 		
 		# if there's multiple reference positions, we have multiple output files. first let's check that the number of refrence points corresponds to the number of output file, and that the number of ref points matches the number of columns in the pattern
@@ -564,7 +577,8 @@ class LRSPattern(object):
 			for i, oo in enumerate(out):
 				# create a new output table based on the pattern. we always wabt column[0] (Pointing number), and then 2 columns for x and y
 				ref_patt = Table([self.patt.columns[0], self.patt.columns[(i*2)+1], self.patt.columns[(i*2)+2]], names=['Pointing', 'X', 'Y'], dtype=['i4', 'f8', 'f8'])
-				ref_patt.write(oo, format='ascii.no_header')
+				ascii.write(ref_patt, output=oo, format='basic', delimiter='\t', formats={'X': '%.3f', 'Y': '%.3f'}, overwrite=True)
+				
 				
 			
 		
