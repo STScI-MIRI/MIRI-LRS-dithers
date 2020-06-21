@@ -389,17 +389,17 @@ class LRSPattern(object):
 				else: 
 					
 					new_patt_table = Table([colpt])
-					
-					
 					for i in range(self.nref):
 						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
 						if (self.mode[0] == 'slit'):
-							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'MIRIM_SLIT')
+							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
 						elif (self.mode[0] == 'slitless'):
-							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'MIRIM_SLITLESSPRISM')
+							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
 						colx = Column(new_patt[0], name=col_keys[0])
 						coly = Column(new_patt[1], name=col_keys[1])
 						new_patt_table.add_columns([colx, coly])
+					self.patt = new_patt_table
+					self.frame = new_frame
 					
 			
 			# CASE 1.3: FROM TELESCOPE FRAME TO TELESCOPE FRAME: DO NOTHING!		
@@ -413,7 +413,7 @@ class LRSPattern(object):
 		elif (new_frame == 'idl'):
 			print('Converting coordinates to Ideal frame')
 			
-			#CASE 2.1: FROM DETECTOR FRAME TO IDEAL FRAME
+			#CASE 2.1: FROM DETECTOR FRAME TO IDEAL FRAME - THIS CONVERSION FIRST GOES TO V2V3 THEN TO IDEAL.
 			if ('det' in self.frame):
 				
 				if ('rel' in self.frame):
@@ -436,9 +436,25 @@ class LRSPattern(object):
 				
 				else:
 					
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						new_patt = mt.xytov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'F770W')
+						if (self.mode[0] == 'slit'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+					# Update the pattern attributes
+					self.patt = new_patt_table
+					self.frame = new_frame
 					
 					
-					pass
+					
+					
+					
 
 			# CASE 2.2: FROM TELESCOPE FRAME TO IDEAL FRAME
 			elif ('tel' in self.frame):
@@ -458,7 +474,19 @@ class LRSPattern(object):
 				
 				else:
 										
-					pass
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						if (self.mode[0] == 'slit'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+					# Update the pattern attributes
+					self.patt = new_patt_table
+					self.frame = new_frame
 					
 			# CASE 2.3: PATTERN ALREADY IN IDEAL FRAME. DO NOTHING!
 			elif ('idl' in self.frame):
