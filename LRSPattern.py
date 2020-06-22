@@ -519,20 +519,53 @@ class LRSPattern(object):
 					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
 					new_patt_table = Table([colpt, colx, coly])
 				
-					# update the Pattern attributes:
-					self.patt = new_patt_table
-					self.frame = new_frame
 
 				else:
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						new_patt = mt.v2v3toxy(self.patt[col_keys[0]], self.patt[col_keys[1]], 'F770W')
+						colx = Column(new_patt[0]+1., name=col_keys[0])
+						coly = Column(new_patt[1]+1., name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+				
+				# Update the pattern attributes
+				self.patt = new_patt_table
+				self.frame = new_frame
 					
-					pass
 			
 			# CASE 3.4: FROM IDEAL FRAME TO ABSOLUTE DETECTOR FRAME. 
 			elif ('idl' in self.frame):
+				if (self.nref == 1):	
+					if (self.mode[0] == 'slit'):
+						tel_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						tel_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM')
+					new_patt = mt.v2v3toxy(tel_patt[0], tel_patt[1], 'F770W')
+					colx = Column(new_patt[0]+1., name=self.patt.colnames[1])
+					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+				
+				else:
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						if (self.mode[0] == 'slit'):
+							tel_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							tel_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						new_patt = mt.v2v3toxy(tel_patt[0], tel_patt[1], 'F770W')
+						colx = Column(new_patt[0]+1., name=col_keys[0])
+						coly = Column(new_patt[1]+1., name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+				
+				
+				
+				# update the Pattern attributes:
+				self.patt = new_patt_table
+				self.frame = new_frame
 					
-				print('Cannot currently convert from Ideal to xy')
-					
-				pass
+				
 					
 					
 		return
