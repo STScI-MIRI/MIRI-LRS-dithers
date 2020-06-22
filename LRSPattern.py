@@ -436,14 +436,16 @@ class LRSPattern(object):
 				
 				else:
 					
+					#pdb.set_trace()
+					
 					new_patt_table = Table([colpt])
 					for i in range(self.nref):
 						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
-						new_patt = mt.xytov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'F770W')
+						tel_patt = mt.xytov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'F770W')
 						if (self.mode[0] == 'slit'):
-							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+							new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLIT')
 						elif (self.mode[0] == 'slitless'):
-							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+							new_patt = mt.v2v3toIdeal(tel_patt[0], tel_patt[1], 'MIRIM_SLITLESSPRISM')
 						colx = Column(new_patt[0], name=col_keys[0])
 						coly = Column(new_patt[1], name=col_keys[1])
 						new_patt_table.add_columns([colx, coly])
