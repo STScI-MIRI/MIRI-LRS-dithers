@@ -339,6 +339,8 @@ class LRSPattern(object):
 			
 			# NOTE: convert the detector coordinates to ZERO-INDEXED coordinates before conversion. 
 			#pdb.set_trace()
+			
+			# CASE 1.1: FROM DETECTOR FRAME TO TELESCOPE FRAME
 			if ('det' in self.frame):
 				
 				if ('rel' in self.frame):
@@ -356,9 +358,18 @@ class LRSPattern(object):
 					self.frame = new_frame
 				
 				else:
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						new_patt = mt.xytov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'F770W')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
 					
-					pass
-			
+					self.patt = new_patt_table
+					self.frame = new_frame
+						
+			# CASE 1.2: FROM IDEAL FRAME TO TELESCOPE FRAME
 			elif ('idl' in self.frame):
 				
 				if (self.nref == 1):
@@ -377,16 +388,32 @@ class LRSPattern(object):
 				
 				else: 
 					
-					pass 
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						if (self.mode[0] == 'slit'):
+							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							new_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+					self.patt = new_patt_table
+					self.frame = new_frame
 					
-			else:
+			
+			# CASE 1.3: FROM TELESCOPE FRAME TO TELESCOPE FRAME: DO NOTHING!		
+			elif ('tel' in self.frame):
 				
-				pass
+				print('Pattern already in frame {}'.format(new_frame))
+				
+				
 					
-					
+		# CASE 2: TO IDEAL FRAME			
 		elif (new_frame == 'idl'):
 			print('Converting coordinates to Ideal frame')
 			
+			#CASE 2.1: FROM DETECTOR FRAME TO IDEAL FRAME - THIS CONVERSION FIRST GOES TO V2V3 THEN TO IDEAL.
 			if ('det' in self.frame):
 				
 				if ('rel' in self.frame):
@@ -409,8 +436,27 @@ class LRSPattern(object):
 				
 				else:
 					
-					pass
-			
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						new_patt = mt.xytov2v3(self.patt[col_keys[0]]-1., self.patt[col_keys[1]]-1., 'F770W')
+						if (self.mode[0] == 'slit'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+					# Update the pattern attributes
+					self.patt = new_patt_table
+					self.frame = new_frame
+					
+					
+					
+					
+					
+
+			# CASE 2.2: FROM TELESCOPE FRAME TO IDEAL FRAME
 			elif ('tel' in self.frame):
 				
 				if (self.nref == 1):
@@ -428,21 +474,42 @@ class LRSPattern(object):
 				
 				else:
 										
-					pass
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						if (self.mode[0] == 'slit'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							new_patt = mt.v2v3toIdeal(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						colx = Column(new_patt[0], name=col_keys[0])
+						coly = Column(new_patt[1], name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+					# Update the pattern attributes
+					self.patt = new_patt_table
+					self.frame = new_frame
+					
+			# CASE 2.3: PATTERN ALREADY IN IDEAL FRAME. DO NOTHING!
+			elif ('idl' in self.frame):
+				print('Pattern already in frame {}'.format(new_frame))
 			
 			
-		
+		#CASE 3: TO DETECTOR FRAME
 		elif (new_frame == 'det'):
 			print('Converting coordinates to Detector frame')
 			# NOTE the tel -> detector conversion returns ZERO-INDEXED coordinates, so need to add 1 to put into SIAF frame
 			
+			
+			# CASE 3.1: ALREADY IN DETECTOR FRAME, BUT RELATIVE COORDINATES. THIS IS THE SAME AS RUNNING THE TO_ABSOLUTE() METHOD
 			if ('rel' in self.frame):
 				self.to_absolute()
 			
+			# CASE 3.2: ALREADY IN ABSOLUTE DETECTOR FRAME. DO NOTHING.
 			elif ('abs' in self.frame):
-				#DO NOTHING
-				pass
 				
+				print('Pattern already in frame {}'.format(new_frame))
+				
+				
+			# CASE 3.3: FROM TELESCOPE FRAME TO ABSOLUTE DETECTOR FRAME	
 			elif ('tel' in self.frame):
 					
 				if (self.nref == 1):
@@ -452,70 +519,58 @@ class LRSPattern(object):
 					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
 					new_patt_table = Table([colpt, colx, coly])
 				
-					# update the Pattern attributes:
-					self.patt = new_patt_table
-					self.frame = new_frame
 
 				else:
-					
-					pass
-
-			elif ('idl' in self.frame):
-					
-				print('Cannot currently convert from Ideal to xy')
-					
-				pass
-					
-					
-		return
-		
-		
-	def run_checks(self):
-		
-		'''In this function we will run some sanity checks on the coordinates and reference frames provided, so that we don't waste time or create unrealistic patterns. DOESN'T CURRENTLY WORK.
-		
-		Parameters:
-		-----------
-		the pattern, an LRSPattern instance
-		
-		Output:
-		-------
-		None
-		'''
-		
-		xcols = [xx for xx in self.patt.colnames if 'x' in xx]
-		ycols = [yy for yy in self.patt.colnames if 'y' in yy]
-		
-		if (self.frame=='det-abs'):
-			
-			for c in self.patt.colnames[1:]:
-				assert (np.all(self.patt[c]) > 0.), "Coordinate frame/values inconsistency: Coordinates must be positive in an absolute frame"
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						new_patt = mt.v2v3toxy(self.patt[col_keys[0]], self.patt[col_keys[1]], 'F770W')
+						colx = Column(new_patt[0]+1., name=col_keys[0])
+						coly = Column(new_patt[1]+1., name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
 				
-			# for x columns the values have to lie below 1032, for y columns below 1024. strictly speaking it's below 1032.5, but let's assume that if we're trying to point half a pixel from the edge, something's gone wrong.
-			for c in self.patt[xcols]:
-				assert (np.all(self.patt[c]) <= 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
-			for c in self.patt[ycols]:
-				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
-		
-		
-		elif (self.frame=='det-rel'):
-			 #with the relative detector coordinates values can be negative but they still shouldn't exceed the array size.
+				# Update the pattern attributes
+				self.patt = new_patt_table
+				self.frame = new_frame
+					
 			
-			for c in self.patt[xcols]:
-				assert (np.all(self.patt[c]) <= 1032.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
-			for c in self.patt[ycols]:
-				assert (np.all(self.patt[c]) <= 1024.), "Coordinate frame/values inconsistency: Pixel coordinates out of bounds"
-			#pdb.set_trace()
-
-		# for frame 'tel', check that the coordinates are within the MIRI Imager detector
-		elif (self.frame=='tel'):
-			for c in self.patt[xcols]:
-				assert (np.all(self.patt[c]) >= -486.) and (np.all(self.patt[c]) <= -381.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
-			for c in self.patt[ycols]:
-				assert (np.all(self.patt[c]) >= -436.) and (np.all(self.patt[c]) <= -314.), "Coordinate frame/values inconsistency: Telescope coordinates out of range of the MIRI Imager detector"
-			
-			
+			# CASE 3.4: FROM IDEAL FRAME TO ABSOLUTE DETECTOR FRAME. 
+			elif ('idl' in self.frame):
+				if (self.nref == 1):	
+					if (self.mode[0] == 'slit'):
+						tel_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLIT')
+					elif (self.mode[0] == 'slitless'):
+						tel_patt = mt.Idealtov2v3(self.patt['x'], self.patt['y'], 'MIRIM_SLITLESSPRISM')
+					new_patt = mt.v2v3toxy(tel_patt[0], tel_patt[1], 'F770W')
+					colx = Column(new_patt[0]+1., name=self.patt.colnames[1])
+					coly = Column(new_patt[1]+1., name=self.patt.colnames[2])
+					new_patt_table = Table([colpt, colx, coly])
+				
+				else:
+					new_patt_table = Table([colpt])
+					for i in range(self.nref):
+						col_keys = [self.patt.keys()[(i*2)+1], self.patt.keys()[(i*2)+2]]
+						if (self.mode[0] == 'slit'):
+							tel_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLIT')
+						elif (self.mode[0] == 'slitless'):
+							tel_patt = mt.Idealtov2v3(self.patt[col_keys[0]], self.patt[col_keys[1]], 'MIRIM_SLITLESSPRISM')
+						new_patt = mt.v2v3toxy(tel_patt[0], tel_patt[1], 'F770W')
+						colx = Column(new_patt[0]+1., name=col_keys[0])
+						coly = Column(new_patt[1]+1., name=col_keys[1])
+						new_patt_table.add_columns([colx, coly])
+				
+				
+				
+				# update the Pattern attributes:
+				self.patt = new_patt_table
+				self.frame = new_frame
+					
+				
+					
+					
 		return
+		
+		
 
 #----------------------------------------------------------------------------	
 
