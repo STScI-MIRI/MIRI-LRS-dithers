@@ -172,7 +172,7 @@ class LRSPattern(object):
 		# first check that the input pattern is defined in relative coordinates
 		assert ('rel' in self.frame), "The input pattern is not in relative coordinates!"
 		
-		print('Converting pattern to absolute coordinates.....')
+		print('Converting pattern to absolute (1-INDEXED) coordinates.....')
 		# if the input coordinates are relative, load the coordinates so we can do the translation
 		coords = lrs_gencoords(mode=self.mode, frame=self.frame[:3], verbose=False)
 		

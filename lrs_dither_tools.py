@@ -44,7 +44,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	
 	# the slit corner coordinates are hard coded unfortunately (in detector units):
 	if (mode == 'slit'):
-		# populate the dictionary with the slit corner and centre coordinates, in PIXELS
+		# populate the dictionary with the slit corner and centre coordinates, in PIXELS and 1-INDEXED.
 		coord_dict_det = {'ll': {'x': 304.77, 'y': 298.38},
 			    	'ul': {'x': 304.77, 'y': 303.03}, 
 			       	'ur': {'x': 347.49, 'y': 303.03},
