@@ -1,7 +1,7 @@
 # Pattern name: along_slit_nod
 # Mode: slit
 # Frame: det-abs
-# Reference: 
+# Reference: n/a
 # CARs:
 # CALs:
 # Comments: the default 2-pt nod pattern

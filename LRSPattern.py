@@ -83,7 +83,7 @@ class LRSPattern(object):
 				self.name = file.split('.')[0]
 			
 			
-			# first check if there are multiple reference positions:
+			# first check if there are multiple reference positions - NOTE this is only relevant for patterns in frame det-rel
 			ref_tmp = (self.ref[0]).split(',')
 			# strip out whitespaces in case there are any:
 			refs = [r.strip() for r in ref_tmp]
