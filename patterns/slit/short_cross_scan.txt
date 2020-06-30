@@ -1,7 +1,7 @@
 # Pattern name: short_cross_scan
 # Mode: slit
 # Frame: det-rel
-# Reference: nod1, nod2
+# Reference: c, nod1, nod2
 # CARs: CAR-018
 # CALs: 
 # Comments: CAR uses short scan
