@@ -64,7 +64,7 @@ ap = siaf['MIRIM_SLITLESSPRISM']
 print('Comparison with SIAF value for slitless pointing position:')
 ref_tel = ap.reference_point(to_frame='tel')
 print(ref_tel)
-print ('DIFFERENCE IN SLITLESS POINTING POS = {0:.5f} in X, {1:.5f} in Y'.format(pp.patt['x'][4]-ref_tel[0], pp.patt['y'][4]-ref_tel[1]))
+print ('DIFFERENCE IN SLITLESS POINTING POS = {0:.5f} in X, {1:.5f} in Y'.format(pp.patt['x'][5]-ref_tel[0], pp.patt['y'][5]-ref_tel[1]))
 print('\n\n')
 
 print('Converting back to detector')
@@ -92,7 +92,7 @@ print('Comparison with SIAF value for slitless pointing position:')
 ref_idl = ap.reference_point(to_frame='idl')
 print(ref_idl)
 
-print ('DIFFERENCE IN SLITLESS POINTING POS = {0:.5f} in X, {1:.5f} in Y'.format(pp.patt['x'][4]-ref_idl[0], pp.patt['y'][4]-ref_idl[1]))
+print ('DIFFERENCE IN SLITLESS POINTING POS = {0:.5f} in X, {1:.5f} in Y'.format(pp.patt['x'][5]-ref_idl[0], pp.patt['y'][5]-ref_idl[1]))
 
 print('Converting back to detector')
 pp.to_coordinates(new_frame='det')
