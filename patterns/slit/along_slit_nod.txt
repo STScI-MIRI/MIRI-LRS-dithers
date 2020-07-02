@@ -1,4 +1,4 @@
-# Pattern name: along_slit_nod
+# Pattern name: ALONG_SLIT_NOD
 # Mode: slit
 # Frame: det-abs
 # Reference: n/a

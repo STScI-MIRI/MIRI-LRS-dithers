@@ -683,12 +683,12 @@ def write_prd(input_dir='', output_dir=''):
 			if (i==0):
 				print(pname,file=open(outfile,"w+"))
 				for j in range(pp.npts):
-					print('{0:<3}{1:>8.6f}         {2:>8.6f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
+					print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
 		
 			else:
 				print(pname,file=open(outfile,"a"))
 				for j in range(pp.npts):
-					print('{0:<3}{1:>8.6f}         {2:>8.6f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
+					print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
 
 			print(' ', file=open(outfile, "a"))
 			
@@ -705,11 +705,11 @@ def write_prd(input_dir='', output_dir=''):
 				if (i==0):
 					print(pname[r],file=open(outfile,"w+"))
 					for j in range(pp.npts):
-						print('{0:<3}{1:>8.6f}         {2:>8.6f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
+						print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
 				else:
 					print(pname[r],file=open(outfile,"a"))
 					for j in range(pp.npts):
-						print('{0:<3}{1:>8.6f}         {2:>8.6f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
+						print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
 				print(' ', file=open(outfile, "a"))
 				
 			

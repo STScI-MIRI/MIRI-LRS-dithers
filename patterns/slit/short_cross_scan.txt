@@ -1,4 +1,4 @@
-# Pattern name: short_cross_scan
+# Pattern name: SHORT_CROSS_SCAN
 # Mode: slit
 # Frame: det-rel
 # Reference: c, nod1, nod2
