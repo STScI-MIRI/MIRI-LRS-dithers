@@ -1,0 +1,19 @@
+# Pattern name: 5PIXEL_SLITLESS_SCAN
+# Mode: slitless
+# Frame: det-rel
+# Reference: c
+# CARs:
+# CALs:
+# Comments: not currently used
+# Created by: Kendrew/Sloan
+
+
+Pointing  x   y
+  1 -17.500  0.0000 
+  2 -12.500  0.0000
+  3  -7.500  0.0000
+  4  -2.500  0.0000
+  5  2.500  0.0000
+  6  7.500  0.0000
+  7  12.500  0.0000
+  8  17.500  0.0000
