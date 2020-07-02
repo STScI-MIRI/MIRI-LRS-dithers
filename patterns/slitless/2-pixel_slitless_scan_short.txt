@@ -1,4 +1,4 @@
-# Pattern name: LRS_2PIX_SLITLESS_SCAN_SHORT
+# Pattern name: 2PIX_SLITLESS_SCAN_SHORT
 # Mode: slitless
 # Frame: det-rel
 # Reference: c

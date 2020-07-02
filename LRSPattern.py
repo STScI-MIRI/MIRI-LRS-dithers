@@ -78,10 +78,11 @@ class LRSPattern(object):
 			self.notes = header['val'][header['key']=='Comments']
 			self.ref = header['val'][header['key']=='Reference']
 			self.frame = header['val'][header['key']=='Frame'][0]
-			if ('/' in file):
-				self.name = (file.split('/')[-1]).split('.')[0]
-			else:
-				self.name = file.split('.')[0]
+			self.name = header['val'][header['key']=='Pattern name'][0]
+			#if ('/' in file):
+			#	self.name = (file.split('/')[-1]).split('.')[0]
+			#else:
+			#	self.name = file.split('.')[0]
 			
 			
 			# first check if there are multiple reference positions - NOTE this is only relevant for patterns in frame det-rel
@@ -673,11 +674,12 @@ def write_prd(input_dir='', output_dir=''):
 	pfiles = glob.glob(input_dir+'*.txt')
 
 	for i, pf in enumerate(pfiles):
+		print(pf)
 		pp = LRSPattern(file=pf)
 		pp.to_coordinates(new_frame='idl')
 		# extract the name of the pattern. if there's only 1 reference, then this is the name from the metadata with the _ replaced by whitespace
 		if (pp.nref == 1):
-			pname = pp.name.replace('_', ' ')
+			pname = pp.name
 			
 			# for the first file we want to write the output file, the rest is appended
 			if (i==0):
@@ -697,7 +699,7 @@ def write_prd(input_dir='', output_dir=''):
 			refs_tmp = (pp.ref[0]).split(',')
 			# this will just remove any whitespace from the reference locations:
 			refs = [r.strip() for r in refs_tmp]
-			pname = [(pp.name+'_'+rr).replace('_', ' ') for rr in refs]
+			pname = [(pp.name+'_'+rr) for rr in refs]
 			
 			for r in range(pp.nref):
 				col_keys = [pp.patt.keys()[(r*2)+1], pp.patt.keys()[(r*2)+2]]

@@ -1,4 +1,4 @@
-# Pattern name: test_detrel
+# Pattern name: test_detrel_slitless
 # Mode: slitless
 # Frame: det-rel
 # Reference: c
