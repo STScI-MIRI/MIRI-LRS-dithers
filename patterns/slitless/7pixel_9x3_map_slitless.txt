@@ -4,7 +4,7 @@
 # Reference: c
 # CARs: CAR-075
 # CALs:
-# Comments:
+# Comments: supserseded by combined 9x3+8x4 scan maps
 # Created by: Detre
 
 
