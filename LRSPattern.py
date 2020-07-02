@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib.patches import Polygon
 import matplotlib.pyplot as plt
+import os
 from os import access, R_OK
 import glob
 from astropy.table import Table, Column, vstack
@@ -78,7 +79,7 @@ class LRSPattern(object):
 			self.ref = header['val'][header['key']=='Reference']
 			self.frame = header['val'][header['key']=='Frame'][0]
 			if ('/' in file):
-				self.name = (file.split('/')[1]).split('.')[0]
+				self.name = (file.split('/')[-1]).split('.')[0]
 			else:
 				self.name = file.split('.')[0]
 			
@@ -643,5 +644,82 @@ class LRSPattern(object):
 		
 ######################################################################################
 
-def write_prd
+def write_prd(input_dir='', output_dir=''):
+	
+	'''This function will take all the patterns in a given directory and write them to a file suitable for PRD ingestion. 
+	
+	Parameters
+	----------
+	- input_dir: 	a directory with pattern files
+	- output_dir:	where to place the output file
+	
+	
+	
+	'''	
+	
+	today = datetime.date.today().isoformat()
+	
+	if (output_dir==''):
 		
+		output_dir = 'output-patterns/'
+	
+	if ('slitless' in input_dir):
+		out_tmp = 'MiriLrsDithers_slitless_{}.txt'.format(today)
+	else:
+		out_tmp = 'MiriLrsDithers_slit_{}.txt'.format(today)
+		
+	outfile = os.path.join(output_dir, out_tmp)
+	
+	pfiles = glob.glob(input_dir+'*.txt')
+
+	for i, pf in enumerate(pfiles):
+		pp = LRSPattern(file=pf)
+		pp.to_coordinates(new_frame='idl')
+		# extract the name of the pattern. if there's only 1 reference, then this is the name from the metadata with the _ replaced by whitespace
+		if (pp.nref == 1):
+			pname = pp.name.replace('_', ' ')
+			
+			# for the first file we want to write the output file, the rest is appended
+			if (i==0):
+				print(pname,file=open(outfile,"w+"))
+				for j in range(pp.npts):
+					print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
+		
+			else:
+				print(pname,file=open(outfile,"a"))
+				for j in range(pp.npts):
+					print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt['x'][j], pp.patt['y'][j]), file=open(outfile, "a"))
+
+			print(' ', file=open(outfile, "a"))
+			
+		else:
+			# create an iterable list for the reference positions. works fine for a single reference location as well:
+			refs_tmp = (pp.ref[0]).split(',')
+			# this will just remove any whitespace from the reference locations:
+			refs = [r.strip() for r in refs_tmp]
+			pname = [(pp.name+'_'+rr).replace('_', ' ') for rr in refs]
+			
+			for r in range(pp.nref):
+				col_keys = [pp.patt.keys()[(r*2)+1], pp.patt.keys()[(r*2)+2]]
+				
+				if (i==0):
+					print(pname[r],file=open(outfile,"w+"))
+					for j in range(pp.npts):
+						print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
+				else:
+					print(pname[r],file=open(outfile,"a"))
+					for j in range(pp.npts):
+						print('{0:<3}{1:>10.4f}         {2:>10.4f}'.format(pp.patt['Pointing'][j], pp.patt[col_keys[0]][j], pp.patt[col_keys[1]][j]), file=open(outfile, "a"))
+				print(' ', file=open(outfile, "a"))
+				
+			
+			# if there are multiple references, then split them out and print individually
+			
+		
+		
+	
+		
+	
+	
+	
+	

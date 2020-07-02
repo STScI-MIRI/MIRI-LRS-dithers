@@ -1,7 +1,7 @@
-# Pattern name: long_cross_scan
+# Pattern name: LONG_CROSS_SCAN
 # Mode: slit
 # Frame: det-rel
-# Reference: nod1, nod2
+# Reference: c, nod1, nod2
 # CARs: 
 # CALs: CAL-036
 # Comments: Cal activity uses long scan

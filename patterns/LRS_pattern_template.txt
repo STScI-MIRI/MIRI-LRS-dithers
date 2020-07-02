@@ -1,4 +1,4 @@
-# Pattern name:
+# Pattern name: 
 # Mode: 
 # Frame:
 # Reference: 
@@ -9,5 +9,3 @@
 
 
 Pointing  x   y
-
-

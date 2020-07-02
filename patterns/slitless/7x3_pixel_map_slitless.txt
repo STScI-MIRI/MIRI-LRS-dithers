@@ -1,7 +1,7 @@
-# Pattern name: 7x3_PIXEL_MAP_SLIT
-# Mode: slit
+# Pattern name: 7X3_PIXEL_MAP_SLITLESS
+# Mode: slitless
 # Frame: det-rel
-# Reference: c, nod1, nod2
+# Reference: c
 # CARs: CAR-055
 # CALs: CAL-032
 # Comments: Note the ordering of the pointings doesn't violate the FSM limitation

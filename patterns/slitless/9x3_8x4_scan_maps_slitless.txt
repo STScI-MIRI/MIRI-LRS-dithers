@@ -1,0 +1,11 @@
+# Pattern name: 9X3_8X4_SCAN_MAPS_SLITLESS  
+# Mode: slitless
+# Frame: det-rel
+# Reference: c
+# CARs: CAR-075
+# CALs:
+# Comments: combines two 2 maps 
+# Created by: Detre
+
+
+Pointing  x   y

@@ -1,14 +1,14 @@
-# Pattern name:
-# Mode: slit
+# Pattern name: INTRAPIXEL_SLITLESS_SCAN
+# Mode: slitless
 # Frame: det-rel
-# Reference: c, nod1, nod2
+# Reference: c
 # CARs: CAR-076
 # CALs: CAL-034
-# Comments:
+# Comments: identical to slit intrapixel scan
 # Created by: Kendrew/Sloan
 
 
-Pointing  x     y
+Pointing  x   y
 1        0.00   0.00
 2       -0.10   0.00
 3       -0.20   0.00
