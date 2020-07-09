@@ -1,4 +1,4 @@
-# Pattern name: 2-PIXEL_SLIT_SCAN
+# Pattern name: 2PIXEL_SLIT_SCAN
 # Mode: slit
 # Frame: det-rel
 # Reference: c
