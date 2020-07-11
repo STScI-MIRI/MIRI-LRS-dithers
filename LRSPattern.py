@@ -261,6 +261,7 @@ class LRSPattern(object):
 			ax.scatter(cornersx, cornersy, marker='+', color='g')
 			ax.scatter(coords['c']['x'], coords['c']['y'], marker='o', color='r', label='slit centre')
 			for n in ['nod1', 'nod2']:
+				print(coords[n]['x'], coords[n]['y'])
 				ax.scatter(coords[n]['x'], coords[n]['y'], marker='o', edgecolor='r', facecolor='white')
 			ax.add_patch(slit_rect)
 			

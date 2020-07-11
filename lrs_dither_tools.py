@@ -206,7 +206,6 @@ def generate_nods(slit, verbose=False):
 	
 	
 	outslit = slit.copy()
-	
 	# calculate the coordinates of the midpoints along the slit's edges:
 	# (force the y coordinate to be the same as that of the slit centre in xy coordinates!)
 	midl_x = np.mean([slit['ul']['x'], slit['ll']['x']])
@@ -215,7 +214,7 @@ def generate_nods(slit, verbose=False):
 	#midl = [midl_x, midl_y]
 	
 	midr_x = np.mean([slit['ur']['x'], slit['lr']['x']])
-	midr = [midl_x, slit['c']['y']]
+	midr = [midr_x, slit['c']['y']]
 	#midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
 	#midr = [midr_x, midr_y]
 
