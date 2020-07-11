@@ -1,0 +1,13 @@
+#ignore all idl files
+*.pro
+
+#ignore the folders that hold the idl files and everything in them
+idl/
+
+# ignore compiled code
+*.pyc
+
+# ignore apt files and their numerous backups, and pointing files
+*.aptx
+*.aptbackup
+*.pointing
