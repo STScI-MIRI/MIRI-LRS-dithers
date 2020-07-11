@@ -42,22 +42,30 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	# the read_aperture function (below) converts 'slit' or 'slitless' to the appropriate SIAF aperture name.
 	ap = read_aperture(mode=mode)
 	
+	# get the slit centre coordinates from the SIAF
+	# if mode is slit then have to do this in v2v3 first, if slitless can get it directly in detector coordinates. remember to add 1!
+	
 	# the slit corner coordinates are hard coded unfortunately (in detector units):
 	if (mode == 'slit'):
+		
+		xc, yc = ap.reference_point(to_frame='tel')
+		xxc, yyc = mt.v2v3toxy(xc, yc, 'F770W')
 		# populate the dictionary with the slit corner and centre coordinates, in PIXELS and 1-INDEXED.
 		coord_dict_det = {'ll': {'x': 304.77, 'y': 298.38},
 			    	'ul': {'x': 304.77, 'y': 303.03}, 
 			       	'ur': {'x': 347.49, 'y': 303.03},
 			       	'lr': {'x': 347.49, 'y': 298.38},
-					'c': {'x':326.13, 'y': 300.70}}
+					'c': {'x':xxc[0]+1., 'y': yyc[0]+1.}}
 		
 		# calculate and add the coordinates of the nods as well
 		coord_dict_det = generate_nods(coord_dict_det, verbose=verbose)
 		
+		print(coord_dict_det)
 		
 	else:
-		# For slitless, we start with only the centre coordinate
-		coord_dict_det = {'c': {'x': 38.5, 'y': 829.0}}
+		# For slitless, we start with only the centre coordinate. DONT HAVE TO ADD 1 IF PULLING DIRECTLY FROM THE SIAF IN XY COORDS!!
+		xc, yc = ap.reference_point(to_frame='det')
+		coord_dict_det = {'c': {'x': xc, 'y': yc}}
 	
 	if (frame == 'tel'):
 		coord_dict = coord_dict_det.copy()
@@ -200,14 +208,16 @@ def generate_nods(slit, verbose=False):
 	outslit = slit.copy()
 	
 	# calculate the coordinates of the midpoints along the slit's edges:
-
+	# (force the y coordinate to be the same as that of the slit centre in xy coordinates!)
 	midl_x = np.mean([slit['ul']['x'], slit['ll']['x']])
-	midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
-	midl = [midl_x, midl_y]
+	midl = [midl_x, slit['c']['y']]
+	#midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
+	#midl = [midl_x, midl_y]
 	
 	midr_x = np.mean([slit['ur']['x'], slit['lr']['x']])
-	midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
-	midr = [midr_x, midr_y]
+	midr = [midl_x, slit['c']['y']]
+	#midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
+	#midr = [midr_x, midr_y]
 
 	# now create a grid of 11 points between these points (each represents 10% along the slit) and pick the 4th and 8th in (x,y):
 	xpts = np.linspace(midl[0], midr[0], num=11)
