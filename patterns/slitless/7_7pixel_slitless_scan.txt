@@ -1,7 +1,7 @@
 # Pattern name: 7PIXEL_SLITLESS_SCAN
 # Mode: slitless
 # Frame: det-rel
-# Reference: c
+# Reference: center
 # CARs:
 # CALs:
 # Comments: not currently used

@@ -1,7 +1,7 @@
-# Pattern name: 7PX+5PX_SLIT_SCAN
+# Pattern name: 7PIX_5PIX_SLIT_SCAN
 # Mode: slit
 # Frame: det-rel
-# Reference: c
+# Reference: center
 # CARs: CAR-075
 # CALs:
 # Comments: 

@@ -1,7 +1,7 @@
 # Pattern name: INTRAPIXEL_SLIT_SCAN
 # Mode: slit
 # Frame: det-rel
-# Reference: c, nod1, nod2
+# Reference: center, nod1, nod2
 # CARs: CAR-076
 # CALs: CAL-034
 # Comments:

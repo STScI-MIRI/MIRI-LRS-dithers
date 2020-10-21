@@ -1,7 +1,7 @@
 # Pattern name: INTRAPIXEL_SLITLESS_SCAN
 # Mode: slitless
 # Frame: det-rel
-# Reference: c
+# Reference: center
 # CARs: CAR-076
 # CALs: CAL-034
 # Comments: identical to slit intrapixel scan

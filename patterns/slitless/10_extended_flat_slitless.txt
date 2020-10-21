@@ -1,7 +1,7 @@
 # Pattern name:EXTENDED_FLAT_SLITLESS
 # Mode: slitless
 # Frame: det-rel
-# Reference: c
+# Reference: center
 # CARs: CAR-075
 # CALs:
 # Comments:

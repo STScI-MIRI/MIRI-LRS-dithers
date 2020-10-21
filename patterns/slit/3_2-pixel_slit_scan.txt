@@ -1,7 +1,7 @@
 # Pattern name: 2PIXEL_SLIT_SCAN
 # Mode: slit
 # Frame: det-rel
-# Reference: c
+# Reference: center
 # CARs: 
 # CALs: 
 # Comments:

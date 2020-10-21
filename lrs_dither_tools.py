@@ -55,7 +55,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 			    	'ul': {'x': 304.77, 'y': 303.03}, 
 			       	'ur': {'x': 347.49, 'y': 303.03},
 			       	'lr': {'x': 347.49, 'y': 298.38},
-					'c': {'x':xxc[0]+1., 'y': yyc[0]+1.}}
+					'center': {'x':xxc[0]+1., 'y': yyc[0]+1.}}
 		
 		# calculate and add the coordinates of the nods as well
 		coord_dict_det = generate_nods(coord_dict_det, verbose=verbose)
@@ -65,7 +65,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	else:
 		# For slitless, we start with only the centre coordinate. DONT HAVE TO ADD 1 IF PULLING DIRECTLY FROM THE SIAF IN XY COORDS!!
 		xc, yc = ap.reference_point(to_frame='det')
-		coord_dict_det = {'c': {'x': xc, 'y': yc}}
+		coord_dict_det = {'center': {'x': xc, 'y': yc}}
 	
 	if (frame == 'tel'):
 		coord_dict = coord_dict_det.copy()
@@ -162,7 +162,7 @@ def plot_pattern(slit=None, patt=None):
 		slit_rect = Polygon(corners, closed=True, lw=2., color='g', fill=False, label='slit edge')
 		
 		ax.scatter(cornersx, cornersy, marker='+', color='g')
-		ax.scatter(slit['c']['x'][0], slit['c']['y'][0], marker='o', color='r', facecolor=None, label='slit centre')
+		ax.scatter(slit['center']['x'][0], slit['center']['y'][0], marker='o', color='r', facecolor=None, label='slit centre')
 		ax.add_patch(slit_rect)
     
 	if patt is not None:
@@ -209,12 +209,12 @@ def generate_nods(slit, verbose=False):
 	# calculate the coordinates of the midpoints along the slit's edges:
 	# (force the y coordinate to be the same as that of the slit centre in xy coordinates!)
 	midl_x = np.mean([slit['ul']['x'], slit['ll']['x']])
-	midl = [midl_x, slit['c']['y']]
+	midl = [midl_x, slit['center']['y']]
 	#midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
 	#midl = [midl_x, midl_y]
 	
 	midr_x = np.mean([slit['ur']['x'], slit['lr']['x']])
-	midr = [midr_x, slit['c']['y']]
+	midr = [midr_x, slit['center']['y']]
 	#midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
 	#midr = [midr_x, midr_y]
 
@@ -227,36 +227,5 @@ def generate_nods(slit, verbose=False):
 	if verbose:
 		print(outslit)
 	return outslit
-
-#----------------------------------------------------------------------------	
-def generate_dither_file(mode=None, format=None, outfile=None, verbose=False):
-    
-    '''
-    Function that will write out dither pattern files for selected purposes. Supported are: APT, MIRISim. 
-
-    
-    Parameters:
-    -----------
-    - mode:     'slit' or 'slitless'
-    - format:   the tool the file will be read by. this will determine the output reference frame.
-    - verbose:  Boolean, for extra output. default='False'
-    - outfile:  output filename
-    
-    Output:
-    -------
-    outfile:    output filename. if no name is provided, a filename will be created from the mode, format and creation date.
-    
-    
-    '''
-
-    # take the mode, and read in all patterns in that pattern directory
-    
-    # for APT, convert all to Ideal coordinates. for MIRISim, absolute detector coordinates.
-    
-    # remember to split hem out if there are multiple reference locations
-    
-    # create a big file and print all patterns to file
-    
-    return outfile
 
 #----------------------------------------------------------------------------	
