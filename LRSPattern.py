@@ -678,6 +678,10 @@ def write_prd(input_dir='', output_dir=''):
 	fileind_tmp = [pf.split('/')[-1] for pf in pfiles]
 	fileind = [int(fi.split('_')[0]) for fi in fileind_tmp]
 	
+	# now sort the file list according to these indices
+	pfiles = [pf for _,pf in sorted(zip(fileind, pfiles))]
+	print(pfiles)
+	
 	 
 	
 	pdb.set_trace()

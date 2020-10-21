@@ -1,4 +1,4 @@
-# Pattern name: 1PIX_SLITLESS_SCAN_SHORT
+# Pattern name: 1PIXEL_SLITLESS_SCAN_SHORT
 # Mode: slitless
 # Frame: det-rel
 # Reference: center
