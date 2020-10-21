@@ -1,0 +1,24 @@
+# Pattern name: 7PX+5PX_SLIT_SCAN
+# Mode: slit
+# Frame: det-rel
+# Reference: center
+# CARs: CAR-075
+# CALs:
+# Comments: 
+# Created by: S. Kendrew/G.Sloan 
+
+
+Pointing  x   y
+1       -19.00   0.0
+2       -14.00   0.0
+3       -11.00   0.0
+4       -8.00    0.0
+5       -7.00    0.0
+6       -3.00    0.0
+7       0.00     0.0
+8       2.00     0.0
+9       6.00     0.0
+10      7.00     0.0
+11      12.00    0.0
+12      14.00    0.0
+13      19.00    0.0

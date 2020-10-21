@@ -1,0 +1,20 @@
+# Pattern name: SHORT_CROSS_SCAN
+# Mode: slit
+# Frame: det-rel
+# Reference: center, nod1, nod2
+# CARs: CAR-018
+# CALs: 
+# Comments: CAR uses short scan
+# Created by: Sloan/Kendrew
+
+
+Pointing  x   y
+  1  0.0000 -3.64
+  2  0.0000 -2.73
+  3  0.0000 -1.82
+  4  0.0000 -0.90
+  5  0.0000  0.00
+  6  0.0000  0.90
+  7  0.0000  1.82
+  8  0.0000  2.73
+  9  0.0000  3.64

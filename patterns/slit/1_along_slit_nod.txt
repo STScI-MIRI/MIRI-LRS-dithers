@@ -1,0 +1,15 @@
+# Pattern name: ALONG_SLIT_NOD
+# Mode: slit
+# Frame: det-abs
+# Reference: n/a
+# CARs:
+# CALs:
+# Comments: the default 2-pt nod pattern
+# Created by: Kendrew
+
+
+Pointing  x   y
+1       317.586     300.705
+2       334.674     300.705
+
+
