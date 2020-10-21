@@ -684,7 +684,7 @@ def write_prd(input_dir='', output_dir=''):
 	
 	 
 	
-	pdb.set_trace()
+	#pdb.set_trace()
 
 
 	for i, pf in enumerate(pfiles):
