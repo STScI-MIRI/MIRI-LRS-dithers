@@ -50,12 +50,23 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 		
 		xc, yc = ap.reference_point(to_frame='tel')
 		xxc, yyc = mt.v2v3toxy(xc, yc, 'F770W')
+		
 		# populate the dictionary with the slit corner and centre coordinates, in PIXELS and 1-INDEXED.
-		coord_dict_det = {'ll': {'x': 304.77, 'y': 298.38},
-			    	'ul': {'x': 304.77, 'y': 303.03}, 
-			       	'ur': {'x': 347.49, 'y': 303.03},
-			       	'lr': {'x': 347.49, 'y': 298.38},
-					'center': {'x':xxc[0]+1., 'y': yyc[0]+1.}}
+		#coord_dict_det = {'ll': {'x': 304.77, 'y': 298.38},
+		#	    	'ul': {'x': 304.77, 'y': 303.03}, 
+		#	       	'ur': {'x': 347.49, 'y': 303.03},
+		#	       	'lr': {'x': 347.49, 'y': 298.38},
+		#			'center': {'x':xxc[0]+1., 'y': yyc[0]+1.}}
+		
+		# START IN V2V3 ('TEL') COORDINATES. These are taken from the SIAF
+		coord_dict_det = {'ll': {'x': -412.735, 'y': -401.028},
+			    	'ul': {'x': -412.693, 'y': -400.515}, 
+			       	'ur': {'x': -417.403, 'y': -400.123},
+			       	'lr': {'x': -417.445, 'y': -400.636},
+					'center': {'x':xc, 'y': yc}}
+		
+		
+		
 		
 		# calculate and add the coordinates of the nods as well
 		coord_dict_det = generate_nods(coord_dict_det, verbose=verbose)
@@ -64,24 +75,44 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 		
 	else:
 		# For slitless, we start with only the centre coordinate. DONT HAVE TO ADD 1 IF PULLING DIRECTLY FROM THE SIAF IN XY COORDS!!
-		xc, yc = ap.reference_point(to_frame='det')
+		#xc, yc = ap.reference_point(to_frame='det')
+		
+		# Start from Telescope coordinate system
+		xc, yc = ap.reference_point(to_frame='tel')
 		coord_dict_det = {'center': {'x': xc, 'y': yc}}
 	
-	if (frame == 'tel'):
-		coord_dict = coord_dict_det.copy()
-		for loc in coord_dict_det.keys():
-			x,y = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
-			if verbose:
-				print('{0}, {1}'.format(x, y))
-			coord_dict[loc] = {'x': x[0], 'y': y[0]}
+	#if (frame == 'tel'):
+	#	coord_dict = coord_dict_det.copy()
+	#	for loc in coord_dict_det.keys():
+	#		x,y = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
+	#		if verbose:
+	#			print('{0}, {1}'.format(x, y))
+	#		coord_dict[loc] = {'x': x[0], 'y': y[0]}
+	
+	if (frame == 'det'):
+			coord_dict = coord_dict_det.copy()
+			for loc in coord_dict_det.keys():
+				x,y = mt.v2v3toxy(coord_dict_det[loc]['x'],coord_dict_det[loc]['y'], 'F770W')
+				x[0] = x[0] + 1.
+				y[0] = y[0] + 1.
+				
+				if verbose:
+					print('{0}, {1}'.format(x, y))
+				coord_dict[loc] = {'x': x[0], 'y': y[0]}
+	
 	
 	elif (frame == 'idl'):
 		# to go to ideal coordinatines, we need to go to v2v3 first. so this is an additional step.
 		coord_dict = coord_dict_det.copy()
 		for loc in coord_dict_det.keys():
-			xtel,ytel = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
-			x,y = mt.v2v3toIdeal(xtel, ytel, ap.AperName)
-			coord_dict[loc] = {'x': x[0], 'y': y[0]}
+			#xtel,ytel = mt.xytov2v3(coord_dict_det[loc]['x']-1.,coord_dict_det[loc]['y']-1., 'F770W')
+			#x,y = mt.v2v3toIdeal(xtel, ytel, ap.AperName)
+			
+			# GO FROM TELESCOPE TO IDEAL
+			x,y = mt.v2v3toIdeal(coord_dict_det[loc]['x'],coord_dict_det[loc]['y'], ap.AperName)
+			
+			#coord_dict[loc] = {'x': x[0], 'y': y[0]}
+			coord_dict[loc] = {'x': x, 'y': y}
 			
 	
 	else:
