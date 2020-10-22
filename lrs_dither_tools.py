@@ -60,7 +60,7 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 		# calculate and add the coordinates of the nods as well
 		coord_dict_det = generate_nods(coord_dict_det, verbose=verbose)
 		
-		print(coord_dict_det)
+		#print(coord_dict_det)
 		
 	else:
 		# For slitless, we start with only the centre coordinate. DONT HAVE TO ADD 1 IF PULLING DIRECTLY FROM THE SIAF IN XY COORDS!!
@@ -89,6 +89,8 @@ def lrs_gencoords(mode='slit', frame='tel', plot=False, verbose=False):
 	
 	if plot:
 		p = plot_pattern(slit=coord_dict, patt=None)
+	
+	print('Coordinate dictionary in frame {0}: {1}'.format(frame, coord_dict))
 	
 	
 	return coord_dict
