@@ -240,14 +240,14 @@ def generate_nods(slit, verbose=False):
 	# calculate the coordinates of the midpoints along the slit's edges:
 	# (force the y coordinate to be the same as that of the slit centre in xy coordinates!)
 	midl_x = np.mean([slit['ul']['x'], slit['ll']['x']])
-	midl = [midl_x, slit['center']['y']]
-	#midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
-	#midl = [midl_x, midl_y]
+	#midl = [midl_x, slit['center']['y']]
+	midl_y = np.mean([slit['ul']['y'], slit['ll']['y']])
+	midl = [midl_x, midl_y]
 	
 	midr_x = np.mean([slit['ur']['x'], slit['lr']['x']])
-	midr = [midr_x, slit['center']['y']]
-	#midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
-	#midr = [midr_x, midr_y]
+	#midr = [midr_x, slit['center']['y']]
+	midr_y = np.mean([slit['ur']['y'], slit['lr']['y']])
+	midr = [midr_x, midr_y]
 
 	# now create a grid of 11 points between these points (each represents 10% along the slit) and pick the 4th and 8th in (x,y):
 	xpts = np.linspace(midl[0], midr[0], num=11)
